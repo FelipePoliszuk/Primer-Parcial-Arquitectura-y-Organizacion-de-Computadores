@@ -1,0 +1,28 @@
+# --- Archivos de Compilación (Objetos) ---
+*.o
+
+# --- Ejecutables generados (Tests) ---
+test_asm
+test_c
+test_abi
+a.out
+
+# --- Archivos generados por los scripts de la cátedra ---
+asm_defs.txt
+global_foos.txt
+checker
+*.out
+
+# --- Entornos Virtuales de Python (venv) ---
+# Veo que tienes carpetas de python, no queremos subir todo el entorno
+venv/
+__pycache__/
+*.pyc
+lib64/
+pyvenv.cfg
+pip-selfcheck.json
+
+# --- Configuraciones de IDE y Sistema ---
+.vscode/
+.idea/
+.DS_Store

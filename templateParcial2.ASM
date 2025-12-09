@@ -5,9 +5,8 @@ mi_funcion_ejemplo:
     push rbp
     mov rbp, rsp
 
-    ; PRESERVACIÓN DE CALLEE-SAVED
-    ; (Solo pushear los que realmente vayas a modificar en tu función)
-    push rbx    ; <--- AGREGADO: RBX también es callee-saved
+    ; preservar registros callee-saved 
+    push rbx    
     push r12
     push r13
     push r14
@@ -20,7 +19,7 @@ mi_funcion_ejemplo:
     xor r13, r13        ; acumulador
 
 .loop:
-    cmp r12, 10         ; condición de corte (ejemplo)
+    cmp r12, 10         ; condición de corte 
     je .fin
 
     ; ==========================================================
@@ -73,11 +72,10 @@ mi_funcion_ejemplo:
     mov rax, r13
 
     ; === EPÍLOGO ===
-    ; Recuperar en orden inverso al prólogo
     pop r15
     pop r14
     pop r13
     pop r12
-    pop rbx     ; <--- No te olvides de popear RBX
+    pop rbx  
     pop rbp
     ret

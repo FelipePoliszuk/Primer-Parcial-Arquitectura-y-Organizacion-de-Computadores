@@ -3,7 +3,8 @@
     push rbp
     mov rbp, rsp
 
-    ; preservar registros callee-saved si los vas a usar
+    ; preservar registros callee-saved 
+    push rbx   
     push r12
     push r13
     push r14
@@ -13,8 +14,8 @@
     ; Código de inicialización
     ; -------------------
 
-    xor r12, r12        ; ejemplo de índice
-    xor r13, r13        ; ejemplo de acumulador
+    xor r12, r12        ; índice
+    xor r13, r13        ; acumulador
 
 .loop:
     cmp r12, N          ; condición de corte
@@ -47,5 +48,6 @@
     pop r14
     pop r13
     pop r12
+    pop rbx
     pop rbp
     ret
