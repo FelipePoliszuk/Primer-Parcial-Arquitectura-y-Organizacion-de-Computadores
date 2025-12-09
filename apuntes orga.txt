@@ -1,0 +1,133 @@
+=== Apuntes ASM examen ===
+
+Registros
+---------
+No volátiles (callee-saved, hay que preservarlos con push/pop si los usás, siempre en 64 bits):
+  RBX, RBP, R12, R13, R14, R15
+
+Volátiles (caller-saved, se pueden pisar):
+  RAX, RCX, RDX, RSI, RDI, R8, R9, R10, R11
+
+Retorno:
+  RAX → enteros/punteros
+  XMM0 → flotantes
+
+Parámetros (de izquierda a derecha):
+  1. RDI
+  2. RSI
+  3. RDX
+  4. RCX
+  5. R8
+  6. R9
+  (después pasan por stack si hay más)
+
+Flotantes:
+  XMM0–XMM7
+
+---
+
+Stack
+-----
+- Siempre debe estar alineado a 16 bytes antes de un call.
+- Cada push ocupa 8 bytes (desalineás), a veces hay que hacer "sub rsp, 8" para compensar.
+
+---
+
+MOV vs LEA
+----------
+- mov rax, [rdi]  → carga en rax el valor que está en la dirección apuntada por rdi.
+- lea rax, [rdi]  → carga en rax la dirección calculada, no el contenido.
+- Usar lea con arrays embebidos (ej: char arr[12]).
+- lea es como un "mov + add" en una sola instrucción.
+
+---
+LEA = &variable (Operador "Address of").
+
+MOV = variable (Leer el valor).
+---
+
+Tipos en NASM
+-------------
+byte   → 8 bits  (uint8_t)
+word   → 16 bits (uint16_t)
+dword  → 32 bits (uint32_t)
+qword  → 64 bits (uint64_t, punteros en x86-64)
+
+Ejemplos:
+  mov dword [rdi+OFFSET], 0   ; entero de 32 bits
+  mov qword [rdi+OFFSET], 0   ; puntero de 64 bits
+
+---
+
+Mapas y offsets
+---------------
+Para arrays 2D linealizados:
+  offset = fila * Ncolumnas + columna
+
+En ASM:
+  mov rax, rsi              ; fila (x)
+  imul rax, Ncolumnas       ; fila * Ncolumnas
+  add rax, rdx              ; + columna (y)
+
+---
+
+Call y retorno en RAX
+---------------------
+- Toda función devuelve en RAX.
+- Si necesitás el valor después del call, guardalo en un no-volátil:
+    call funcion
+    mov r12, rax
+
+---
+
+Tips de examen
+--------------
+1. No mezclar tamaños: si es puntero → qword.
+2. Chequeo null → cmp rax, 0 y je. Usar [rax] sólo si querés el valor apuntado.
+3. Siempre pensar: “¿quiero la dirección o el contenido?” → diferencia entre mov y lea.
+4. Escribite ejemplos cortos: mov vs lea, push/pop, offset 2D.
+5. Siempre push/pop en 64 bits para registros no volátiles.
+
+
+
+hay que tener cuidado cuando uso RAX y hago un call que el resultado lo devuelve en rax, tengo que guardarlo en un registro
+y luego pop rax pop r9, etc,etc,etc... sino pierdo lo que devolvio la funcion... 
+
+
+preservar los parametros que me dan siempre por las dudas, no puedo loopear con rsi.... !!!!!!!!!
+
+make test_c
+make run_c
+
+make valgrind_c
+
+
+make test_asm
+make run_asm
+
+make test_abi
+make run_abi
+
+make valgrind_asm
+make valgrind_abi
+
+
+----
+
+
+Si te toca una función con muchos argumentos, la receta es:
+
+    Args 1 al 6: RDI, RSI, RDX, RCX, R8, R9.
+
+    Arg 7 en adelante: Están en el Stack.
+
+    Fórmula Maestra: El argumento N (donde N≥7) está en:
+    [RBP+16+(N−7)×8]
+
+        N=7→[RBP+16]
+
+        N=8→[RBP+24]
+
+token git:
+
+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

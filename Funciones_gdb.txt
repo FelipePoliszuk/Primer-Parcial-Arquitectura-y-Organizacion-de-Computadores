@@ -1,0 +1,65 @@
+=== Machete GDB ===
+
+Iniciar
+-------
+gdb ./programa        ; abre gdb con el ejecutable
+run (o r)             ; corre el programa desde el inicio
+start                 ; corre hasta la 1ra instrucción de main
+
+Breakpoints
+-----------
+b funcion             ; breakpoint al inicio de "funcion"
+b *0x401000           ; breakpoint en dirección específica
+info breakpoints (i b); lista los breakpoints
+d NUM                 ; borra breakpoint número NUM
+disable NUM           ; deshabilita breakpoint NUM
+enable NUM            ; habilita breakpoint NUM
+
+Ejecución paso a paso
+---------------------
+n (next)              ; siguiente línea (no entra a funciones)
+s (step)              ; entra dentro de funciones
+si (stepi)            ; ejecuta instrucción ASM (1 paso)
+ni (nexti)            ; ejecuta instrucción ASM sin entrar
+c (continue)          ; continuar hasta próximo breakpoint
+finish                ; continuar hasta salir de la función actual
+
+Inspección de registros y memoria
+---------------------------------
+info registers (i r)  ; muestra todos los registros
+p $rax                ; imprime valor de un registro
+p/x $rax              ; imprime en hexadecimal
+p/d $rax              ; imprime en decimal
+p/t $rax              ; imprime en binario
+p (int)$rax           ; casteo de tipo (ej: entero)
+p (char*)$rdi         ; imprime string en puntero RDI
+
+x/NFMT DIRECCION      ; examina memoria
+  N = cuántos valores mostrar
+  F = formato (x=hex, d=decimal, s=string, i=instrucción)
+  T = tamaño (b=byte, h=2 bytes, w=4 bytes, g=8 bytes)
+
+Ejemplos:
+  x/8gx $rsp          ; 8 valores de 8 bytes desde el stack
+  x/s $rdi            ; muestra string apuntado por RDI
+  x/4i $rip           ; muestra las 4 instrucciones siguientes
+
+Control del flujo
+-----------------
+set var i = 5         ; cambia variable local i a 5
+set $rax = 0x123      ; cambia valor de registro
+jump *0x401050        ; salta a dirección de memoria
+
+Funciones útiles
+----------------
+bt (backtrace)        ; muestra stack de llamadas
+info locals           ; variables locales (en debug info)
+info args             ; argumentos actuales (en debug info)
+disas                 ; desensambla la función actual
+disas funcion         ; desensambla "funcion"
+layout asm            ; modo gráfico (ASM)
+layout regs           ; muestra registros en pantalla
+
+Salir
+-----
+q (quit)              ; salir de gdb

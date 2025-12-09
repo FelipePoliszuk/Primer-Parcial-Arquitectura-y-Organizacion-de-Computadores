@@ -1,0 +1,100 @@
+=== Machete de instrucciones NASM x86-64 ===
+
+Aritmética
+-----------
+add dest, src        ; suma src a dest
+sub dest, src        ; resta src a dest
+imul dest, src       ; multiplicación con signo (dest*src)
+imul dest, src, imm  ; multiplicación con inmediato
+idiv src             ; división con signo, cociente en RAX, resto en RDX
+xor dest, src        ; bitwise XOR, también usado para limpiar registros: xor rax, rax
+
+Asignación / movimiento
+----------------------
+mov dest, src        ; copia src a dest
+movzx dest, src      ; mueve y extiende a cero (ej: byte→32 bits)
+movsx dest, src      ; mueve y extiende con signo
+lea dest, [mem]      ; carga la dirección efectiva (útil para arrays/strings)
+
+Comparación / saltos condicionales
+----------------------------------
+cmp op1, op2         ; compara op1-op2
+je label             ; jump equal (==)
+jne label            ; jump not equal (!=)
+jl label             ; jump less (<, con signo)
+jle label            ; jump less or equal (<=, con signo)
+jg label             ; jump greater (>, con signo)
+jge label            ; jump greater or equal (>=, con signo)
+jb label             ; jump below (<, sin signo)
+jbe label            ; jump below or equal (<=, sin signo)
+ja label             ; jump above (>, sin signo)
+jae label            ; jump above or equal (>=, sin signo)
+jmp label            ; salto incondicional
+loop label           ; decrementa RCX y salta si RCX!=0
+
+Llamadas y stack
+---------------
+call funcion         ; llama a funcion
+ret                  ; retorna de la función
+push reg/mem         ; apila 8 bytes (64 bits) en stack
+pop reg/mem          ; desapila 8 bytes (64 bits) del stack
+sub rsp, N           ; reserva N bytes en stack (alineamiento)
+add rsp, N           ; libera N bytes del stack
+
+Registro y flags
+----------------
+inc reg              ; suma 1 al registro
+dec reg              ; resta 1 al registro
+neg reg              ; cambia signo
+not reg              ; complemento bit a bit
+test reg, reg        ; compara con cero (afecta flags)
+rol/ror reg, n       ; rotate bits left/right
+shl/shr reg, n       ; shift left/right
+sal/sar reg, n       ; shift aritmético left/right
+
+Conversiones y enteros/floats
+-----------------------------
+cvtsi2sd xmm, reg    ; convierte entero a double (x86-64 SSE)
+cvttsd2si reg, xmm   ; convierte double a entero truncado (x86-64 SSE)
+movq xmm, reg        ; mover entero 64 bits a XMM register
+movq reg, xmm        ; mover XMM register a entero 64 bits
+
+Memoria / arrays
+----------------
+mov byte [addr], val      ; guarda 1 byte
+mov word [addr], val      ; guarda 2 bytes
+mov dword [addr], val     ; guarda 4 bytes
+mov qword [addr], val     ; guarda 8 bytes (punteros)
+mov rax, [addr]           ; carga qword
+movzx eax, byte [addr]    ; carga byte y extiende a 32 bits
+movsx eax, byte [addr]    ; carga byte con signo y extiende
+
+Ejemplo 2D array:
+offset = fila*Ncolumnas + col
+mov rax, fila
+imul rax, Ncolumnas
+add rax, col
+imul rax, tamaño_elemento
+mov rbx, [base+rax]       ; accede a array[fila][col]
+
+Strings y utilidades
+-------------------
+lea rdi, [array]           ; dirección del array
+mov rsi, rdi               ; pasar dirección string
+call strcpy                ; llamar a función strcpy
+
+Comparación de punteros
+----------------------
+cmp rax, 0                ; compara puntero con NULL
+je label                   ; si es NULL, salta
+
+Tips
+----
+- Siempre diferenciar mov vs lea: mov carga valor, lea carga dirección.
+- Para chequear punteros null: cmp rax, 0
+- Para acceder a struct members: mov rax, [ptr + OFFSET]
+- Siempre alinear stack a 16 bytes antes de call
+- Guardar registros no volátiles (RBX, RBP, R12-R15) con push/pop
+- Guardar registros volátiles si los necesitás después de un call (RAX, RCX, RDX, R8-R11)
+- Para loops: usar RCX o tu registro iterador
+
