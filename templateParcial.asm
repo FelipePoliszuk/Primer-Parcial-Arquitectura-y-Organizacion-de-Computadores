@@ -41,7 +41,7 @@
 
 .fin:
     ; valor de retorno
-    mov eax, r13d       ; ejemplo, devolver acumulador en eax
+    mov eax, r13d       
 
     ; === EPÍLOGO ===
     pop r15
