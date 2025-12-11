@@ -21,6 +21,7 @@ int contar_casos_por_nivel(caso_t *arreglo_casos, int largo, int nivel) {
 }
 
 segmentacion_t *segmentar_casos(caso_t *arreglo_casos, int largo) {
+  
   int casos0 = contar_casos_por_nivel(arreglo_casos, largo, 0);
   int casos1 = contar_casos_por_nivel(arreglo_casos, largo, 1);
   int casos2 = contar_casos_por_nivel(arreglo_casos, largo, 2);

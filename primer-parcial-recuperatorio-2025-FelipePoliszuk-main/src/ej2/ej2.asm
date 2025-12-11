@@ -135,15 +135,6 @@ invertirRecorridoConDirecciones:
     ret
 
 
-
-
-
-
-
-
-
-
-
 global accion_inversa
 accion_inversa:
 ; registros:

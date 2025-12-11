@@ -1,4 +1,4 @@
-#!/home/pipe/Repositorio-de-parciales-ASM-Intel-64/P1-ComDavid-2c2025/test_utils/venv/bin/python3
+#!/home/pipe/Escritorio/RecuOrga2/P1-ComFurfi-2c2025/test_utils/venv/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys
