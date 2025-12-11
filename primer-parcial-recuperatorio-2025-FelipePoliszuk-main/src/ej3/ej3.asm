@@ -120,7 +120,6 @@ sumarTesoros:
     inc ebx
     jmp .loop          
 
-
 .fin:
     ; valor de retorno
     mov eax, r15d       ; ejemplo, devolver acumulador en eax

@@ -63,3 +63,8 @@ layout regs           ; muestra registros en pantalla
 Salir
 -----
 q (quit)              ; salir de gdb
+
+
+
+ver los primeros 10 posiciones dela array rdx (ejemplo)
+x/10bx $rdx

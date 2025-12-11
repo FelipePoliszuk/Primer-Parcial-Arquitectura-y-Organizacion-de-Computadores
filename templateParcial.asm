@@ -14,11 +14,11 @@
     ; Código de inicialización
     ; -------------------
 
-    xor r12, r12        ; índice
+    xor rbx, rbx        ; índice
     xor r13, r13        ; acumulador
 
 .loop:
-    cmp r12, N          ; condición de corte
+    cmp rbx, N          ; condición de corte
     je .fin
 
     ; -------------------
@@ -36,7 +36,7 @@
     ; -------------------
 
 .siguiente:
-    inc r12
+    inc rbx
     jmp .loop
 
 .fin:
