@@ -1,0 +1,43 @@
+shortcuts: comentar y descomentar (ctrl + r)
+
+asegurar que funcionen las extensiones con el proxy
+
+descargar todos los archivos
+
+
+ejercicios integradores:
+
+1:	inventario[indice[i]],
+	nuevo_inventario[i]
+
+2:	mapa[x][y],
+	mapa[x][y]->references
+
+3:	raro,
+	arreglo_casos[i].categoria
+
+4:	nuevo_dir[0] = directorio1,
+	carta->__dir[i]->ability_name
+
+5: 	accion->destino->nombre   (char) lea o add
+	accion->destino->en_juego (bool) mov
+	
+	tablero->campo[i][j]->jugador
+
+furfi: 	lista enlazada,
+	usuario->bloqueados[usuario->cantBloqueados] = usuarioABloquear,
+	borrar nodo en LE
+
+david:	nuevo_usuario->id = ids[i];
+
+
+
+mi recu:
+	mapa->habitaciones[actual].vecinos[direccion]
+	mapa->habitaciones[actual].contenido.es_tesoro
+	Accion accion = rec->acciones[len-i-1];
+	inverso->acciones = acciones;
+	
+	recursión:
+	acumulador += sumarTesoros(mapa, habitacion_actual.vecinos[i], visitado);
+	
