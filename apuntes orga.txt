@@ -131,3 +131,8 @@ Si te toca una función con muchos argumentos, la receta es:
 token git:
 
 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
+
+
+Caso,Propósito,Instrucción,Resultado en el Registro
+MOV (Con corchetes),Obtener el VALOR del dato.,"movzx r8d, word [dir]",El valor numérico del dato (ej: el número 50).
+LEA,Obtener la DIRECCIÓN del dato (el puntero).,"lea r8, [dir]",La dirección de memoria donde empieza el dato (ej: 0x407020).
