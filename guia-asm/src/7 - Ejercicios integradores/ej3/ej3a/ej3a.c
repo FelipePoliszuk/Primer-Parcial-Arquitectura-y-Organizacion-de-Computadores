@@ -6,15 +6,14 @@
 int contar_casos_por_nivel(caso_t *arreglo_casos, int largo, int nivel) {
 
   int cantidad = 0;
-
-  if (arreglo_casos) {
+  
     int i = 0;
     while (i < largo) {
       if (arreglo_casos[i].usuario->nivel == nivel) {
         cantidad += 1;
       }
       i += 1;
-    }
+
   }
 
   return cantidad;

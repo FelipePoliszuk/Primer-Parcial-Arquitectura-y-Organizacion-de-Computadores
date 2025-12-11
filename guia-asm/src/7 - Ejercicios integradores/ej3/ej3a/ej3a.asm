@@ -33,38 +33,63 @@ ESTADISTICAS_ESTADO2_OFFSET EQU 6
 ESTADISTICAS_SIZE EQU 7
 ; [C R K D | 0 1 2 _] SIZE = 7, alineado a 1
 
-; rdi -> caso_t*
-; rsi -> largo
-; rdx -> nivel
+; int contar_casos_por_nivel(caso_t *arreglo_casos, int largo, int nivel) 
 contar_casos_por_nivel:
-	push rbp
-	mov rbp, rsp
+; Registros:
+; 	rdi -> caso_t
+; 	rsi -> largo
+; 	edx -> nivel
 
-	xor rax, rax
+    ; === PRÓLOGO ===
+    push rbp
+    mov rbp, rsp
+    ; preservar registros callee-saved 
+    push rbx   
+    push r12
+	push r13
 
-	cmp rsi, 0
-	jz .end
+	mov r13, rdi		  ; r13 = arreglo_casos
 
-	.loop:
-	dec rsi
-	; cargo caso_t
-	mov r11, rsi
-	imul r11, CASO_SIZE
-	add r11, CASO_USUARIO_OFFSET
-	mov r9, QWORD [rdi + r11]
-	mov r10d, DWORD [r9 + USUARIO_NIVEL_OFFSET]
+    xor r12, r12     	  ; r12 = cantidad = 0
+	xor rbx, rbx     	  ; rbx = índice = 0
 	
-	cmp r10d, edx
-	jne .otherlevel
-	
-	inc rax
-	.otherlevel:
-	test rsi, rsi
-	jnz .loop
+.loop:
+    cmp rbx, rsi          ; condición de corte
+    je .fin
 
-	.end:
-	pop rbp
-ret
+	mov r8, rbx
+	
+	imul r8, CASO_SIZE
+
+	mov r9, r13									; r9 = arreglo_casos	 (O USAR LEA)
+	add r9, r8									; r9 = arreglo_casos[i]  (O USAR LEA)
+
+	mov r9, QWORD [r9 + CASO_USUARIO_OFFSET]	; arreglo_casos[i].usuario
+
+	cmp dword[r9 + USUARIO_NIVEL_OFFSET], edx		; arreglo_casos[i].usuario->nivel == nivel
+	jne .siguiente
+	inc r12             	  ; cantidad++
+
+
+.siguiente:
+    inc rbx
+    jmp .loop
+
+.fin:
+    mov rax, r12       		;devuelvo cantidad en rax
+
+    ; === EPÍLOGO ===
+	pop r13
+    pop r12
+    pop rbx
+    pop rbp
+    ret
+	
+
+
+
+
+
 
 ;segmentacion_t* segmentar_casos(caso_t* arreglo_casos, int largo)
 global segmentar_casos
@@ -186,3 +211,38 @@ segmentar_casos:
 	add rsp, 8
 	pop rbp
 ret
+
+
+
+; ; rdi -> caso_t*
+; ; rsi -> largo
+; ; rdx -> nivel
+; contar_casos_por_nivel:
+; 	push rbp
+; 	mov rbp, rsp
+
+; 	xor rax, rax
+
+; 	cmp rsi, 0
+; 	jz .end
+
+; 	.loop:
+; 	dec rsi
+; 	; cargo caso_t
+; 	mov r11, rsi
+; 	imul r11, CASO_SIZE
+; 	add r11, CASO_USUARIO_OFFSET
+; 	mov r9, QWORD [rdi + r11]
+; 	mov r10d, DWORD [r9 + USUARIO_NIVEL_OFFSET]
+	
+; 	cmp r10d, edx
+; 	jne .otherlevel
+	
+; 	inc rax
+; 	.otherlevel:
+; 	test rsi, rsi
+; 	jnz .loop
+
+; 	.end:
+; 	pop rbp
+; ret

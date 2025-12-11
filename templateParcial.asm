@@ -15,7 +15,7 @@
     ; -------------------
 
     xor rbx, rbx        ; índice
-    xor r13, r13        ; acumulador
+    xor r12, r12        ; acumulador
 
 .loop:
     cmp rbx, N          ; condición de corte
@@ -41,7 +41,7 @@
 
 .fin:
     ; valor de retorno
-    mov eax, r13d       
+    mov rax, r12       
 
     ; === EPÍLOGO ===
     pop r15
