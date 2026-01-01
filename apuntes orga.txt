@@ -128,9 +128,6 @@ Si te toca una función con muchos argumentos, la receta es:
 
         N=8→[RBP+24]
 
-token git:
-
-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
 
 
 Caso,Propósito,Instrucción,Resultado en el Registro
