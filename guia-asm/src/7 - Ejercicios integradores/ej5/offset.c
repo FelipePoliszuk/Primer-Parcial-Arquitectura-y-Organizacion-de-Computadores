@@ -7,12 +7,13 @@ int main() {
     printf("Offset nombre:   %zu\n", offsetof(carta_t, nombre));
     printf("Offset vida:     %zu\n", offsetof(carta_t, vida));
     printf("Offset jugador:  %zu\n", offsetof(carta_t, jugador));
+
     printf("SIZE:            %zu\n\n", sizeof(carta_t));
     
     printf("Offset mano rojo: %zu\n", offsetof(tablero_t, mano_jugador_rojo));
     printf("Offset mano azul: %zu\n", offsetof(tablero_t, mano_jugador_azul));
     printf("Offset campo:     %zu\n", offsetof(tablero_t, campo));
-	// printf("Offset campo:     %zu\n", offsetof(fantastruco_t, face_up));
+	// printf("Offset campo:     %zu\n", offsetof(tablero_t, face_up));
     printf("SIZE:            %zu\n\n", sizeof(tablero_t));
     
     printf("Offset invocar: %zu\n", offsetof(accion_t, invocar));
@@ -23,7 +24,7 @@ int main() {
 
     return 0;
 }
-// sss
+
 
 // gcc -o offsets offset.c 
 // ./offsets

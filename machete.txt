@@ -1,0 +1,5 @@
+Anotate esto como machete mental:
+
+    Cada flecha -> en C es un puntero. Requiere un viaje a la memoria y una instrucción mov nueva en ASM.
+
+    Cada punto . en C es un offset. Significa que la información está pegada ahí mismo, así que solo se suma adentro de los corchetes [...], no requiere un mov extra.

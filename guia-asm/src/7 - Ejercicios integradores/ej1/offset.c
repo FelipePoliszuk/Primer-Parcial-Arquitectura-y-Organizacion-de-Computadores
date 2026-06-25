@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include <stddef.h>
-#include "ej4a.h" //reemplazar por el .h 
+#include "ej1.h" //reemplazar por el .h 
 
 int main() {
-    printf("Offset en_juego: %zu\n", offsetof(item_kind_t, ITEM_KIND_TENT));
-    printf("Offset nombre:   %zu\n", offsetof(item_kind_t, ability_ptr));
-    printf("Offset vida:     %zu\n", offsetof(directory_entry_t, vida));
-    printf("Offset jugador:  %zu\n", offsetof(directory_entry_t, jugador));
-    printf("SIZE:            %zu\n\n", sizeof(directory_entry_t));
+    printf("Offset en_juego: %zu\n", offsetof(item_t, nombre));
+    printf("Offset nombre:   %zu\n", offsetof(item_t, fuerza));
+    printf("Offset vida:     %zu\n", offsetof(item_t, durabilidad));
+    // printf("Offset jugador:  %zu\n", offsetof(item_t, jugador));
+    printf("SIZE:            %zu\n\n", sizeof(item_t));
     
-    printf("Offset mano rojo: %zu\n", offsetof(fantastruco_t, __dir));
-    printf("Offset mano azul: %zu\n", offsetof(fantastruco_t, __dir_entries));
-    printf("Offset campo:     %zu\n", offsetof(fantastruco_t, __archetype));
-	printf("Offset campo:     %zu\n", offsetof(fantastruco_t, face_up));
-    printf("SIZE:            %zu\n\n", sizeof(fantastruco_t));
+    // printf("Offset mano rojo: %zu\n", offsetof(fantastruco_t, __dir));
+    // printf("Offset mano azul: %zu\n", offsetof(fantastruco_t, __dir_entries));
+    // printf("Offset campo:     %zu\n", offsetof(fantastruco_t, __archetype));
+	// printf("Offset campo:     %zu\n", offsetof(fantastruco_t, face_up));
+    // printf("SIZE:            %zu\n\n", sizeof(fantastruco_t));
     
     // printf("Offset invocar: %zu\n", offsetof(accion_t, invocar));
     // printf("Offset destino: %zu\n", offsetof(accion_t, destino));

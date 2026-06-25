@@ -41,15 +41,16 @@ bool EJERCICIO_3_HECHO = true;
 // bool hay_accion_que_toque(accion_t *accion, char *nombre) {
 bool hay_accion_que_toque(accion_t *accion, char *nombre) {
 
-  while (accion) {
-    if (strcmp(nombre, accion->destino->nombre) == 0)
-      return true;
+    accion_t *actual = accion;
 
-    accion = accion->siguiente;
-  }
-  return false;
+    while (actual){
+        if (strcmp(nombre, actual->destino->nombre) == 0){
+            return true;
+        }
+        actual = actual->siguiente;
+    }
+    return false;
 }
-
 
 /**
  * Invoca las acciones que fueron encoladas en la secuencia proporcionada en el
@@ -73,18 +74,19 @@ bool hay_accion_que_toque(accion_t *accion, char *nombre) {
  * orden de ejecución.
  */
 void invocar_acciones(accion_t* accion, tablero_t* tablero) {
-	while (accion){
-		if (accion->destino->en_juego == true){
-			accion->invocar(tablero, accion->destino);
-			
-			if (accion->destino->vida == 0){
-				accion->destino->en_juego = false;
-			}
-		}
-		accion = accion->siguiente;			
-	}
-}
 
+    accion_t *actual = accion;
+
+    while (actual){
+        if (actual->destino->en_juego  == true){
+            actual->invocar(tablero, actual->destino);
+            if (actual->destino->vida == 0){
+                actual->destino->en_juego = false;
+            }
+        }
+        actual = actual->siguiente;
+    }
+}
 
 /**
  * Cuenta la cantidad de cartas rojas y azules en el tablero.
@@ -104,23 +106,57 @@ void invocar_acciones(accion_t* accion, tablero_t* tablero) {
  * como parámetro.
  */
 void contar_cartas(tablero_t* tablero, uint32_t* cant_rojas, uint32_t* cant_azules) {
-	
-	uint32_t contador_azules = 0;
-	uint32_t contador_rojas = 0;
+    
+    uint32_t contador_rojas = 0;
+    uint32_t contador_azules = 0;
 
-	for (size_t i = 0; i < ALTO_CAMPO; i++){
-		for (size_t j = 0; j < ANCHO_CAMPO; j++){
-			if (tablero->campo[i][j]){
-
-				if (tablero->campo[i][j]->jugador == 1){
-					contador_rojas +=1;
-				}
-				if (tablero->campo[i][j]->jugador == 2){
-					contador_azules +=1;
-				}
-			}
-		}
-	}
-	*cant_rojas = contador_rojas;
-	*cant_azules = contador_azules ;
+    for (size_t i = 0; i < ALTO_CAMPO; i++){
+        for (size_t j = 0; j < ANCHO_CAMPO; j++){
+            if (tablero->campo[i][j]){   
+                if (tablero->campo[i][j]->jugador == JUGADOR_ROJO){
+                    contador_rojas ++;
+                } else if (tablero->campo[i][j]->jugador == JUGADOR_AZUL){
+                    contador_azules ++;
+                }
+            }
+        }
+    }
+    *cant_rojas = contador_rojas;
+    *cant_azules = contador_azules;
 }
+
+
+
+// /**
+//  * Invoca las acciones que fueron encoladas en la secuencia proporcionada en el
+//  * primer parámetro.
+//  *
+//  * A la hora de procesar una acción esta sólo se invoca si la carta destino
+//  * sigue en juego.
+//  *
+//  * Luego de invocar una acción, si la carta destino tiene cero puntos de vida,
+//  * se debe marcar ésta como fuera de juego.
+//  *
+//  * Las funciones que implementan acciones de juego tienen la siguiente firma:
+//  * ```c
+//  * void mi_accion(tablero_t* tablero, carta_t* carta);
+//  * ```
+//  * - El tablero a utilizar es el pasado como parámetro
+//  * - La carta a utilizar es la carta destino de la acción (`accion->destino`)
+//  *
+//  * Las acciones se deben invocar en el orden natural de la secuencia (primero
+//  * la primera acción, segundo la segunda acción, etc). Las acciones asumen este
+//  * orden de ejecución.
+//  */
+// void invocar_acciones(accion_t* accion, tablero_t* tablero) {
+// 	while (accion){
+// 		if (accion->destino->en_juego == true){
+// 			accion->invocar(tablero, accion->destino);
+			
+// 			if (accion->destino->vida == 0){
+// 				accion->destino->en_juego = false;
+// 			}
+// 		}
+// 		accion = accion->siguiente;			
+// 	}
+// }
