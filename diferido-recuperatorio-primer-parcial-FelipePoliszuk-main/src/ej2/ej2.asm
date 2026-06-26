@@ -37,16 +37,142 @@ extern backpackContainsItem
 extern free
 
 
+; VERSION CON PUNTEROS DOBLES 
+
 ; void filterPossibleDestinations(itinerary_t *itinerary, backpack_t *backpack)
 global filterPossibleDestinations
 filterPossibleDestinations:
+; registros:
+    ; rdi = itinerary
+    ; rsi = backpack
+
+    ; === PRÓLOGO ===
+    push rbp
+    mov rbp, rsp
+
+    ; preservar registros callee-saved 
+    push rbx   
+    push r12
+    push r13
+    push r14
+
+    mov r12, rdi        ; r12 = itinerary
+    mov r13, rsi        ; r13 = backpack
+
+    lea rbx, qword[r12 + ITINERARY_FIRST_OFFSET]        ; rbx = **indirecto
+
+.loop:
+    cmp qword[rbx], 0         ; condición de corte
+    je .fin
+
+    mov r14, qword[rbx]     ; r14 (*actual) = *indirecto
+
+    mov rdi, r13            ; rdi = backpack
+    mov rsi, qword[r14 + EVENT_DESTINATION_OFFSET]       ; rsi = actual->destination
+    call meetsRequirements
+
+    test al,al
+    jne .else
+
+    mov rdi, qword[r14 + EVENT_NEXT_OFFSET]
+    mov [rbx], rdi
+
+    mov rdi, r14        ; rdi = actual 
+    call free_event2
+    jmp .loop
+
+.else: 
+    lea rbx, qword[r14 + EVENT_NEXT_OFFSET]        ; rbx (indirecto) = &actual->next;
+    jmp .loop
+
+.fin:    
+    ; === EPÍLOGO ===
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    pop rbp
     ret
-    
 
 
+; VERSION CLÁSICA
+
+; ; void filterPossibleDestinations(itinerary_t *itinerary, backpack_t *backpack)
+; global filterPossibleDestinations
+; filterPossibleDestinations:
+; ; registros:
+;     ; rdi = itinerary
+;     ; rsi = backpack
+
+;     ; === PRÓLOGO ===
+;     push rbp
+;     mov rbp, rsp
+
+;     ; preservar registros callee-saved 
+;     push rbx   
+;     push r12
+;     push r13
+;     push r14
+;     push r15
+;     sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
+
+;     mov r12, rdi        ; r12 = itinerary
+;     mov r13, rsi        ; r13 = backpack
+
+;     mov rbx, qword[r12 + ITINERARY_FIRST_OFFSET]        ; rbx = (*)actual
+
+;     xor r14, r14        ; r14 = anterior = NULL
+
+; .loop:
+;     test rbx, rbx         ; condición de corte
+;     jz .fin
+
+;     mov r15, qword[rbx + EVENT_NEXT_OFFSET]      ; r15 = proximo
+
+;     mov rdi, r13            ; rdi = backpack
+;     mov rsi, qword[rbx + EVENT_DESTINATION_OFFSET]       ; rsi = actual->destination
+;     call meetsRequirements
+
+;     test al,al
+;     jne .else
+
+;     test r14, r14   
+;     je .ifTrue
+
+;     mov qword[r14 + EVENT_NEXT_OFFSET], r15      ; anterior->next = proximo
+;     jmp .free
 
 
+; .ifTrue:
+;     mov qword[r12 + ITINERARY_FIRST_OFFSET], r15
+;     jmp .free
 
+
+; .free:
+
+;     mov rdi, rbx        ; rdi = actual
+;     call free_event2
+
+;     jmp .siguiente
+
+; .else: 
+;     mov r14, rbx        ; r14 (anterior) = actual
+
+; .siguiente:
+;     mov rbx, r15          ; rbx (actual) = proximo
+;     jmp .loop
+
+; .fin:    
+
+;     ; === EPÍLOGO ===
+;     add rsp, 8          ; Deshago el alineamiento global
+;     pop r15
+;     pop r14
+;     pop r13
+;     pop r12
+;     pop rbx
+;     pop rbp
+;     ret
 
 
 ; ----------- Función Auxiliar - meetsRequirements -----------
@@ -54,245 +180,92 @@ filterPossibleDestinations:
 ; bool meetsRequirements(backpack_t *backpack, destination_t *dest) {
 global meetsRequirements
 meetsRequirements:
+; registros:
+    ; rdi = backpack
+    ; rsi = dest
+
+    ; === PRÓLOGO ===
+    push rbp
+    mov rbp, rsp
+
+    ; preservar registros callee-saved 
+    push rbx   
+    push r12
+    push r13
+    sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
+
+    mov r12, rdi        ; r12 = backpack
+    mov r13, rsi        ; r13 = dest
+
+    xor rbx, rbx        ; ebx = índice = 0
+
+.loop:
+    cmp ebx, dword[r13 + DESTINATION_REQUIREMENTS_SIZE_OFFSET]          ; condición de corte
+    je .devuelvoTrue
+
+    mov rdi, r12        ; rdi = backpack
+    mov rsi, [r13 + DESTINATION_REQUIREMENTS_OFFSET]       ; rsi = dest->requirements
+
+    mov esi, [rsi + (rbx*4)]        ; esi = dest->requirements[i]
+
+    call backpackContainsItem         ; llamada a función
+
+    cmp al, 0
+    je .devuelvoFalse
+
+.siguiente:
+    inc ebx
+    jmp .loop
+
+.devuelvoTrue:
+    mov rax, 1
+    jmp .fin
+
+.devuelvoFalse:
+    mov rax, 0    
+
+.fin:  
+    ; === EPÍLOGO ===
+    add rsp, 8          ; Deshago el alineamiento global
+    pop r13
+    pop r12
+    pop rbx
+    pop rbp
     ret
+
 
 
 ; ----------- Función Auxiliar - free_event -----------
 
-
 ; void free_event2(event_t *event) 
 global free_event2
 free_event2:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-; ; void filterPossibleDestinations(itinerary_t *itinerary, backpack_t *backpack)
-; global filterPossibleDestinations
-; filterPossibleDestinations:
-; ; registros:
-
-; ; RDI = itinerary
-; ; RSI = backpack
-
-;     ; === PRÓLOGO ===
-;     push rbp
-;     mov rbp, rsp
-
-;     ; preservar registros callee-saved 
-;     push rbx   
-;     push r12
-;     push r13
-;     push r14
-;     push r15
-;     sub rsp, 8          ; Alineo la pila para TODA la función
-
-;     mov r12, rdi        ; r12 = itinerary
-;     mov r13, rsi        ; r13 = backpack
-
-;     mov r14, [r12 + ITINERARY_FIRST_OFFSET]          ; r14 = actual  
-;     mov r15, 0                                       ; r15 = prev  
-
-
-; .loop:
-;     cmp r14, 0          ; condición de corte
-;     je .fin
-
-;     mov rbx, [r14 + EVENT_NEXT_OFFSET]          ; rbx = proximo
-    
-;     ;paso argumentos a meetsRequirements
-    
-;     mov rdi, r13        ; rdi = backpack
-;     mov rsi, qword[r14 + EVENT_DESTINATION_OFFSET]        ; rsi = actual->destination
-
-;     call meetsRequirements      ; llamo a meetsRequirements
-
-;     cmp al, 1
-;     je  .else          ; caso else
-
-;     ; si no cumple los requisitos hay que eliminar el nodo de la LE
-
-;     cmp r15, 0            ; prev == NULL
-;     jne .else2       
-
-;     mov [r12 + ITINERARY_FIRST_OFFSET], rbx      ; itinerary->first = proximo;
-;     jmp .free
-
-; .else2:
-;     mov [r15 + EVENT_NEXT_OFFSET], rbx      ; prev->next = proximo;
-;     jmp .free
-
-; .free:
-    
-;     mov rdi, r14            ; rdi = actual
-
-;     call free_event2               ; libero puntero
-
-; .siguiente:
-;     mov r14, rbx            ; actual = proximo;
-;     jmp .loop
-
-; .else:
-;     mov r15, r14     ; prev = actual
-;     jmp .siguiente
-
-; .fin:   
-
-;     ; === EPÍLOGO ===
-;     add rsp, 8      ; Restauro la pila justo antes de los pop
-;     pop r15
-;     pop r14
-;     pop r13
-;     pop r12
-;     pop rbx
-;     pop rbp
-;     ret
-
-
-; ; ----------- Función Auxiliar - meetsRequirements -----------
-
-; ; bool meetsRequirements(backpack_t *backpack, destination_t *dest) {
-; global meetsRequirements
-; meetsRequirements:
-; ; registros:
-
-; ; RDI = backpack
-; ; RSI = dest
-
-;     ; === PRÓLOGO ===
-;     push rbp
-;     mov rbp, rsp
-
-;     ; preservar registros callee-saved 
-;     push rbx   
-;     push r12
-;     push r13
-;     push r14
-;     push r15
-;     sub rsp, 8          ; Alineo la pila para TODA la función
-
-;     mov r12, rdi        ; r12 = backpack
-;     mov r13, rsi        ; r13 = dest
-
-;     xor rbx, rbx        ; índice
-;     xor r14, r14
-
-;     mov al, 1          ; seteo true valor predeterminado
-
-; .loop:
-;     cmp ebx, dword[r13 + DESTINATION_REQUIREMENTS_SIZE_OFFSET]          ; condición de corte
-;     je .fin
-
-;     ; mov r14, [r13 + DESTINATION_REQUIREMENTS_OFFSET + (rbx*4)]           ; dest->requirements[i]   mal mal mal
-    
-;     mov r8, [r13 + DESTINATION_REQUIREMENTS_OFFSET]           ; r8 = dest->requirements
-;     mov r14d, dword[r8 + (rbx*4)]                       ; r14 = dest->requirements[i]
-    
-;     ;paso argumentos a backpackContainsItem
-
-;     mov rdi, r12            ; rdi = backpack
-;     mov esi, r14d            ; rsi = dest->requirements[i]
-
-;     call backpackContainsItem            ; llamada a función
-
-;     cmp al, 0 
-;     je  .devuelvoFalse          ; devuelvo false 
-
-
-; .siguiente:
-;     inc rbx
-;     jmp .loop
-
-; .devuelvoTrue:
-;     mov al, 1    
-;     jmp .fin 
-
-; .devuelvoFalse:
-;     mov al, 0 
-
-; .fin:     
-;     ; === EPÍLOGO ===
-;     add rsp, 8      ; Restauro la pila justo antes de los pop
-;     pop r15
-;     pop r14
-;     pop r13
-;     pop r12
-;     pop rbx
-;     pop rbp
-;     ret
-
-
-
-; ; ----------- Función Auxiliar - free_event -----------
-
-
-; ; void free_event2(event_t *event) 
-; global free_event2
-; free_event2:
-; ; registros:
-
-; ; RDI = event
-
-;     ; === PRÓLOGO ===
-;     push rbp
-;     mov rbp, rsp
-
-;     ; preservar registros callee-saved 
-;     push rbx   
-;     push r12
-;     push r13
-;     push r14
-;     push r15
-;     sub rsp, 8          ; Alineo la pila para TODA la función
-
-;     mov r12, rdi        ; r12 = event
-
-;     mov r8, [r12 + EVENT_DESTINATION_OFFSET]       ; r8 = event->destination
-;     mov rdi, [r8 + DESTINATION_REQUIREMENTS_OFFSET] ; rdi = event->destination->requirements 
-;     call free
-
-;     mov rdi, [r12 + EVENT_DESTINATION_OFFSET]       ; rdi = event->destination
-;     call free
-
-;     mov rdi, r12                                    ; rdi = event
-;     call free
-
-
-; .fin:     
-;     ; === EPÍLOGO ===
-;     add rsp, 8      ; Restauro la pila justo antes de los pop
-;     pop r15
-;     pop r14
-;     pop r13
-;     pop r12
-;     pop rbx
-;     pop rbp
-;     ret    
+; registros:
+    ; rdi = event
+
+    ; === PRÓLOGO ===
+    push rbp
+    mov rbp, rsp
+
+    ; preservar registros callee-saved 
+    push rbx   
+    sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
+
+    mov rbx, rdi        ; rbx = event
+
+    mov rdi, [rbx + EVENT_DESTINATION_OFFSET]
+    mov rdi, [rdi + DESTINATION_REQUIREMENTS_OFFSET]
+    call free       ; free(event->destination->requirements);
+
+    mov rdi, [rbx + EVENT_DESTINATION_OFFSET]
+    call free       ; free(event->destination);
+
+    mov rdi, rbx  
+    call free       ; free(event);
+
+.fin:  
+    ; === EPÍLOGO ===
+    add rsp, 8          ; Deshago el alineamiento global
+    pop rbx
+    pop rbp
+    ret
