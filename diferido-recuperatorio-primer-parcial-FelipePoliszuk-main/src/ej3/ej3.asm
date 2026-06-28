@@ -39,140 +39,115 @@ extern malloc
 ; backpack_t *prepareBackpack(itinerary_t *itinerary, uint8_t getItemWeight(item_kind_t))
 global prepareBackpack 
 prepareBackpack:
+; registros:
+    ; rdi =  *itinerary
+    ; rsi = getItemWeight
+
+    ; === PRÓLOGO ===
+    push rbp
+    mov rbp, rsp
+
+    ; preservar registros callee-saved 
+    push rbx   
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp, 24         
+
+
+    mov r12, rdi        ; r12 = itinerary
+    mov r13, rsi        ; r13 = getItemWeight
+
+    mov rdi, BACKPACK_SIZE
+    call malloc
+
+    mov rbx, rax        ; rbx = *mochila
+
+    mov dword[rbx + BACKPACK_ITEM_COUNT_OFFSET], 0      ; mochila->item_count = 0;
+    mov byte[rbx + BACKPACK_MAX_WEIGHT_OFFSET], 255     ; mochila->max_weight = 255;
+
+    mov rdi, 8      ; rdi = sizeof(item_t)
+    imul rdi, 7     ; multiplico por 7
+
+    call malloc
+
+    mov qword[rbx + BACKPACK_ITEMS_OFFSET], rax
+
+    mov r14, qword[r12 + ITINERARY_FIRST_OFFSET]        ; r14 = *actual
+
+.whileLoop:
+    test r14, r14          ; condición de corte
+    jz .fin
+
+    mov r8, qword[r14 + EVENT_DESTINATION_OFFSET]                    ; r8 = actual->destination
+    mov r8d, dword[r8 + DESTINATION_REQUIREMENTS_SIZE_OFFSET]       ; r8 = actual->destination->requirements_size
+
+    mov dword[rbp-56], r8d
+
+    xor r15, r15    ; r15 = i = 0
+    
+.forLoop:
+    cmp r15d, dword[rbp-56]       ; condición de corte
+    je .siguienteWhile
+    
+    mov r8, qword[r14 + EVENT_DESTINATION_OFFSET]                    ; r8 = actual->destination
+    mov r8, qword[r8 + DESTINATION_REQUIREMENTS_OFFSET]   ; r8d = actual->destination->requirements
+    mov r8d, dword[r8 + (r15*4)]
+
+    mov dword[rbp-48], r8d       ; [rbp-48] = item
+
+    mov rdi, rbx                ; rdi = mochila
+    mov esi, dword[rbp-48]      ; rsi = item
+
+    call backpackContainsItem
+
+    test al, al     
+    jz .agregarItem
+
+    jmp .siguienteFor
+    
+    
+.siguienteWhile:
+    mov r14, qword[r14 + EVENT_NEXT_OFFSET]
+    jmp .whileLoop
+
+.agregarItem:       
+
+    xor r8, r8  ; limpio r8
+    mov r8d, dword[rbx + BACKPACK_ITEM_COUNT_OFFSET] ;    r8 = mochila->item_count    
+
+    mov r9d, dword[rbp-48]      ; r9d = [rbp-48] = item
+    mov r10, qword [rbx + BACKPACK_ITEMS_OFFSET]
+    mov dword[r10 + (r8*ITEM_SIZE) + ITEM_KIND_OFFSET], r9d      ; mochila->items[mochila->item_count].kind = item;
+
+
+    mov edi, dword[rbp-48]       ; edi = item
+    call r13
+
+    xor r8, r8  ; limpio r8
+    mov r8d, dword[rbx + BACKPACK_ITEM_COUNT_OFFSET] ;    r8 = mochila->item_count        
+
+    mov r10, qword[rbx + BACKPACK_ITEMS_OFFSET] 
+    mov byte[r10 + (r8*ITEM_SIZE) + ITEM_WEIGHT_OFFSET], al
+    
+
+    inc dword[rbx + BACKPACK_ITEM_COUNT_OFFSET]     ; mochila->item_count ++;
+
+.siguienteFor:
+    inc r15d
+    jmp .forLoop
+
+
+.fin:
+    mov rax, rbx    ; devuelvo *mochila    
+
+    ; === EPÍLOGO ===
+    add rsp, 24          
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    pop rbp
     ret
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-; ; backpack_t *prepareBackpack(itinerary_t *itinerary, uint8_t getItemWeight(item_kind_t))
-; global prepareBackpack 
-; prepareBackpack:
-    
-;     ; === PRÓLOGO ===
-;     push rbp
-;     mov rbp, rsp
-
-;     ; preservar registros callee-saved 
-;     push rbx   
-;     push r12
-;     push r13
-;     push r14
-;     push r15
-
-;     sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
-
-;     mov r12, rdi        ; r12 = itinerary
-;     mov r13, rsi        ; r13 = getItemWeight       ; ver si hay que usar  un byte nada mas
-
-
-;     mov rdi, BACKPACK_SIZE
-;     call malloc     
-
-;     mov rbx, rax        ; rbx = mochila
-    
-;     mov r8, ITEM_SIZE
-;     imul r8, 7
-;     mov rdi, r8
-;     call malloc
-
-;     mov [rbx + BACKPACK_ITEMS_OFFSET], rax  ; mochila->items = malloc(sizeof(item_t) * 7);
-
-;     mov byte[rbx + BACKPACK_MAX_WEIGHT_OFFSET], 255    ; mochila->max_weight = 255;
-
-;     mov dword[rbx + BACKPACK_ITEM_COUNT_OFFSET], 0      ; mochila->item_count = 0;
-
-;     mov r14, [r12 + ITINERARY_FIRST_OFFSET]         ; r14 = actual
-
-; .loopWhile: ;while
-;     cmp r14, 0          ; condición de corte
-;     je .fin
-
-;     mov r15, [r14 + EVENT_NEXT_OFFSET]          ; r15 = proximo
-
-; ; -------
-
-;     xor r8, r8          ; r8 = indice = 0
-
-; .loopFor:
-;     mov r11, [r14 + EVENT_DESTINATION_OFFSET]   ; r11 = actual->destination
-;     cmp r8d, dword[r11 + DESTINATION_REQUIREMENTS_SIZE_OFFSET]          ; condición de corte
-;     je .siguienteWhile    
-
-;     mov r10, [r11 + DESTINATION_REQUIREMENTS_OFFSET]  ; r10 = actual->destination->requirements
-    
-;     mov r9d, dword[r10 + r8*4]    ; r9 = item = actual->destination->requirements[i] 
-
-;     push r8
-;     push r9     ; o sub rsp, 8
-
-;     ;preparo argumentos
-;     mov rdi, rbx    ; rdi = mochila
-;     mov rsi, r9     ; rsi = item
-;     call backpackContainsItem
-;     pop r9      ; o add rsp, 8
-;     pop r8
-
-;     cmp al, 1
-;     je .siguienteFor
-
-;     mov r10d, dword[rbx + BACKPACK_ITEM_COUNT_OFFSET]            ; r10 = mochila->item_count
-    
-;     mov r11, qword[rbx + BACKPACK_ITEMS_OFFSET]        ;r11 = mochila->items
-
-
-;     mov dword[r11 + r10*ITEM_SIZE + ITEM_KIND_OFFSET], r9d       ; mochila->items[mochila->item_count].kind = item;
-
-;     push r8
-;     push r9     ; o sub rsp, 8
-;     ;preparo argumento
-;     mov rdi, r9     ; rdi = item
-;     call r13
-;     pop r9      ; o add rsp, 8
-;     pop r8
-
-
-;     mov r10d, dword[rbx + BACKPACK_ITEM_COUNT_OFFSET]            ; r10 = mochila->item_count
-;     mov r11, [rbx + BACKPACK_ITEMS_OFFSET]                    ;r11 = mochila->items
-;     mov byte[r11 + r10 *8 + ITEM_WEIGHT_OFFSET], al     ; mochila->items[mochila->item_count].weight = getItemWeight(item);
-
-
-;     inc dword[rbx + BACKPACK_ITEM_COUNT_OFFSET]         ; mochila->item_count ++;
-
-; .siguienteFor: 
-;     inc r8            ; r8 ++
-;     jmp .loopFor
-
-; ; -------
-
-; .siguienteWhile:
-;     mov r14, r15            ; actual = proximo;
-;     jmp .loopWhile
-
-; .fin:
-;     ; valor de retorno
-;     mov rax, rbx            ; devuelvo mochila en rax
-
-;     ; === EPÍLOGO ===
-;     add rsp, 8          ; Deshago el alineamiento global
-;     pop r15
-;     pop r14
-;     pop r13
-;     pop r12
-;     pop rbx
-;     pop rbp
-;     ret

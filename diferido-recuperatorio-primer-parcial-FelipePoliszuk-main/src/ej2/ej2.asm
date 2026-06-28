@@ -55,6 +55,7 @@ filterPossibleDestinations:
     push r12
     push r13
     push r14
+    sub rsp, 16
 
     mov r12, rdi        ; r12 = itinerary
     mov r13, rsi        ; r13 = backpack
@@ -87,6 +88,7 @@ filterPossibleDestinations:
 
 .fin:    
     ; === EPÍLOGO ===
+    add rsp, 16
     pop r14
     pop r13
     pop r12
