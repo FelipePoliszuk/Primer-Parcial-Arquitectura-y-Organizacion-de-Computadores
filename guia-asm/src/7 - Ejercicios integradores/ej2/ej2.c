@@ -29,50 +29,54 @@ bool EJERCICIO_2B_HECHO = true;
  */
 bool EJERCICIO_2C_HECHO = true;
 
+
 /**
  * OPCIONAL: implementar en C
  */
 
 void optimizar(mapa_t mapa, attackunit_t *compartida, uint32_t (*fun_hash)(attackunit_t *)) {
 
-  for (int x = 0; x < 255; x++){
-    for (int y = 0; y < 255; y++){
-
-      if (mapa[x][y]){
-      
-        if ((mapa[x][y] != compartida) && (fun_hash(mapa[x][y]) == fun_hash(compartida))){
-        
-          if (mapa[x][y]->references == 1){
-            free(mapa[x][y]);
-          } else {
-            mapa[x][y]->references --;
-          }
+  for (size_t i = 0; i < 255; i++){
+    for (size_t j = 0; j < 255; j++){
+      if (mapa[i][j]){
+        if ((mapa[i][j] != compartida) && (fun_hash(mapa[i][j]) == fun_hash(compartida))){
           
-          compartida->references ++;
-        
-          mapa[x][y] = compartida;
-        
-        } 
+            attackunit_t *a_borrar = mapa[i][j];
+            a_borrar->references--;
+
+            if (a_borrar->references == 0) {
+                free(a_borrar);
+            }
+
+            compartida->references ++;
+            mapa[i][j] = compartida;
+            
+          
+        }
       }
-    }
+    }  
   }
 }
+
 
 /**
  * OPCIONAL: implementar en C
  */
 uint32_t contarCombustibleAsignado(mapa_t mapa, uint16_t (*fun_combustible)(char *)) {
-  uint32_t total = 0;
+
+  uint32_t combustible_total = 0;
 
   for (size_t i = 0; i < 255; i++){
     for (size_t j = 0; j < 255; j++){
       if (mapa[i][j]){
-        total += mapa[i][j]->combustible - fun_combustible(mapa[i][j]->clase);
+        combustible_total += mapa[i][j]->combustible - fun_combustible(mapa[i][j]->clase);
       }
-    } 
+    }  
   }
-  return total;
+
+  return combustible_total;
 }
+
 
 /**
  * OPCIONAL: implementar en C
@@ -98,6 +102,5 @@ void modificarUnidad(mapa_t mapa, uint8_t x, uint8_t y, void (*fun_modificar)(at
     }
 
   }
-  
-  
+
 }
