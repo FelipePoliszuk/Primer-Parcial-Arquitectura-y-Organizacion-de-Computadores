@@ -90,6 +90,7 @@ void modificarUnidad(mapa_t mapa, uint8_t x, uint8_t y, void (*fun_modificar)(at
       mapa[x][y]->references -= 1;
       
       strcpy(nueva->clase, mapa[x][y]->clase);
+
       nueva->combustible = mapa[x][y]->combustible;
       
       nueva->references = 1;
@@ -100,7 +101,5 @@ void modificarUnidad(mapa_t mapa, uint8_t x, uint8_t y, void (*fun_modificar)(at
     } else {
       fun_modificar(mapa[x][y]);
     }
-
   }
-
 }

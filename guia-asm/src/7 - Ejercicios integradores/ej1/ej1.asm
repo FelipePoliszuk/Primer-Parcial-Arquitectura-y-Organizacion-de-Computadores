@@ -215,23 +215,6 @@ indice_a_inventario:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ; ;########### ESTOS SON LOS OFFSETS Y TAMAÑO DE LOS STRUCTS
 ; ; Completar las definiciones (serán revisadas por ABI enforcer):
 ; ITEM_NOMBRE EQU 0
