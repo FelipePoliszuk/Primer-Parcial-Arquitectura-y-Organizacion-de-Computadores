@@ -12,11 +12,13 @@ usuario_t** asignarNivelesParaNuevosUsuarios(uint32_t *ids, uint32_t cantidadDeI
     
     for (uint32_t i = 0; i < cantidadDeIds; i++){
         
+        uint32_t nivel_usuario = deQueNivelEs(ids[i]);
 
         usuario_t* nuevo_usuario = malloc(sizeof(usuario_t));
 
+        nuevo_usuario->nivel = nivel_usuario;
         nuevo_usuario->id = ids[i];
-        nuevo_usuario->nivel = deQueNivelEs(ids[i]);
+        
 
         arreglo[i] = nuevo_usuario;
 

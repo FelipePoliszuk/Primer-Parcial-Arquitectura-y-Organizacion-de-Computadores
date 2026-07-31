@@ -9,121 +9,106 @@ section .text
 ; Completar las definiciones (serán revisadas por ABI enforcer):
 USUARIO_ID_OFFSET EQU 0
 USUARIO_NIVEL_OFFSET EQU 4
+
 USUARIO_SIZE EQU 8
 
-PRODUCTO_USUARIO_OFFSET EQU 0
-PRODUCTO_CATEGORIA_OFFSET EQU 8
-PRODUCTO_NOMBRE_OFFSET EQU 17
-PRODUCTO_ESTADO_OFFSET EQU 42
-PRODUCTO_PRECIO_OFFSET EQU 44
-PRODUCTO_ID_OFFSET EQU 48
-PRODUCTO_SIZE EQU 56
+
+PRODUCTO_USUARIO_OFFSET EQU 0        
+PRODUCTO_CATEGORIA_OFFSET EQU 8      
+PRODUCTO_NOMBRE_OFFSET EQU 17       
+PRODUCTO_ESTADO_OFFSET EQU 42        
+PRODUCTO_PRECIO_OFFSET EQU 44        
+PRODUCTO_ID_OFFSET EQU 48                
+
+PRODUCTO_SIZE EQU 56                 
+
 
 PUBLICACION_NEXT_OFFSET EQU 0
 PUBLICACION_VALUE_OFFSET EQU 8
+
 PUBLICACION_SIZE EQU 16
 
+
 CATALOGO_FIRST_OFFSET EQU 0
+
 CATALOGO_SIZE EQU 8
 
-;usuario_t **asignarNivelesParaNuevosUsuarios(uint32_t *ids, uint32_t cantidadDeIds, uint8_t (*deQueNivelEs)(uint32_t)) {
+
+;usuario_t **asignarNivelesParaNuevosUsuarios(uint32_t *ids, uint32_t cantidadDeIds, uint8_t (*deQueNivelEs)(uint32_t))
 global asignarNivelesParaNuevosUsuarios 
 asignarNivelesParaNuevosUsuarios:
 ; registros
-;   1. RDI = uint32_t *ids
-;   2. RSI = uint32_t cantidadDeIds
-;   3. RDX = uint8_t (*deQueNivelEs)(uint32_t)
+    ; rdi = *ids
+    ; esi = cantidadDeIds
+    ; rdx = *deQueNivelEs
 
-    ; === PRÓLOGO ===
+; PRÓLOGO
     push rbp
     mov rbp, rsp
 
-    ; preservar registros callee-saved si los vas a usar
-    push rbx
     push r12
     push r13
     push r14
     push r15
-
-    mov r13, rdi        ; r13 = ids
-    mov r14d, esi        ; r14 = cantidadDeIds
-    mov r15, rdx        ; r15 = deQueNivelEs
-
-    xor r12, r12        ; r12 = 0 - indice
-
-    ; xor r8, r8        
-    ; xor r9, r9 
-    ; xor r10, r10 
-    ; xor r11, r11 
-
-
-    cmp r14d, 0
-    je .null
-
-
-
-    imul rdi, r14, 8     
-    ; push r8
-     sub rsp, 8          ; mantener alineamiento 16 bytes
-    call malloc
-    ; pop r8
-    add rsp, 8
-
-    mov rbx, rax
-
-.loop:
-    cmp r12d, r14d          ; condición de corte
-    je .returnArreglo
-
-
-    mov r8d, [r13 + (r12*4)]           ; r8d = ids[i]
-
-    push r8
-
-    mov edi, r8d         ; pasar argumento
-    call r15            ; llamada a función
-
-    mov r9b, al
-
-    pop r8
-
-
-    push r8
-    push r9
+    push rbx
     sub rsp, 8
 
-    mov rdi, USUARIO_SIZE         ; pasar argumento
-    call malloc                     ; llamada a función
+    test esi, esi
+    jz .devuelvoNULL
 
-    mov r10, rax
+    mov r12, rdi            ; r12 = *ids
+    mov r13d, esi           ; r13d = cantidadDeIds
+    mov r14, rdx            ; r14 = *deQueNivelEs
 
-    add rsp, 8
-    pop r9
-    pop r8
+    mov edi, r13d           ; edi = cantidadDeIds
+    imul edi, 8
 
-    mov [r10 + USUARIO_ID_OFFSET], r8d
-    mov [r10 + USUARIO_NIVEL_OFFSET], r9b
+    call malloc
 
-    mov [rbx + (r12*8)], r10
+    mov r15, rax            ; r15 = ** arreglo
+
+    xor rbx, rbx            ; ebx = i = 0
+
+.loop:
+    cmp ebx, r13d
+    je .devuelvoARREGLO
+
+    mov edi, dword[r12 + (rbx*4)]            ; edi = ids[i]
+    call r14    
+
+    mov byte[rbp-48], al              ; [rbp-48] = nivel_usuario
+
+    mov rdi, USUARIO_SIZE
+    call malloc
+
+    mov r8b, byte[rbp-48]                  ; r8b = nivel_usuario
+    mov byte[rax + USUARIO_NIVEL_OFFSET], r8b
+
+    mov edi, [r12 + (rbx*4)]                    ; edi = ids[i]
+    mov dword[rax + USUARIO_ID_OFFSET], edi
+
+    mov qword[r15 + (rbx*8)], rax
 
 .siguiente:
-    inc r12d
+    inc ebx
     jmp .loop
 
-
-.null:
+.devuelvoNULL:
     mov rax, 0
     jmp .fin
 
-.returnArreglo:
-    mov rax, rbx
+.devuelvoARREGLO:
+    mov rax, r15
 
 .fin:
-    ; === EPÍLOGO ===
+; EPÍLOGO
+
+    add rsp, 8
+    pop rbx
     pop r15
     pop r14
     pop r13
     pop r12
-    pop rbx
-    pop rbp    
+
+    pop rbp
     ret
