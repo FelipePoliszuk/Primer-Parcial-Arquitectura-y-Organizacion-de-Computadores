@@ -21,7 +21,7 @@ void bloquearUsuario_aux(feed_t *feed, usuario_t *usuario){
     if (actual->value->id_autor == usuario->id){
       // Lo salteamos directamente cambiando a dónde apunta la flecha original
       *indirecto = actual->next;
-      // free(actual);
+      free(actual);
     } else {
       // Si no lo borramos, avanzamos nuestra flecha al "next" del nodo actual
       indirecto = &(actual->next);
