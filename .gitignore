@@ -26,3 +26,4 @@ pip-selfcheck.json
 .vscode/
 .idea/
 .DS_Store
+venv/

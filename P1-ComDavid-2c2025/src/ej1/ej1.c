@@ -4,57 +4,60 @@ uint32_t cantidadDeProductos(catalogo_t *h);
 bool cumpleCondiciones(producto_t *producto);
 
 
-producto_t *filtrarPublicacionesNuevasDeUsuariosVerificados(catalogo_t *h) {
- 
-    
-    uint32_t cantidad = cantidadDeProductos(h);
 
-    if (cantidad == 0) {
+producto_t *filtrarPublicacionesNuevasDeUsuariosVerificados(catalogo_t *h){
+
+    uint32_t tamaño = cantidadDeProductos(h);
+
+    if (tamaño == 0){
         return NULL;
     }
+    
+    producto_t **arreglo = malloc((sizeof(producto_t*)) * (tamaño + 1));
 
-    producto_t **arreglo = malloc(sizeof(producto_t*) * (cantidad + 1));
-   
-    publicacion_t* actual = h->first;
+    publicacion_t *actual = h->first;
 
-    int i = 0; // Índice para escribir en el arreglo
-
-    while (actual != NULL) {
-        producto_t* producto = actual->value;
-
-        if (cumpleCondiciones(producto)) {
-            arreglo[i] = producto;
-            i++; 
+    uint32_t i = 0;
+    while (actual){
+        
+        if (cumpleCondiciones(actual->value)){
+            arreglo[i] = actual->value; 
+            i++;
         }
+        
         actual = actual->next;
     }
+    
+    arreglo[tamaño] = NULL;
 
-    arreglo[cantidad] = NULL;
     return arreglo;
 }
 
 
+
 uint32_t cantidadDeProductos(catalogo_t *h){
-    
-    uint32_t contador = 0;
-    
-    publicacion_t* actual = h->first;
 
-    while (actual != NULL) {
-        producto_t* producto = actual->value;
+    uint32_t cantidad = 0;
 
-        if (cumpleCondiciones(producto)) {
-            contador++;
+    publicacion_t *actual = h->first;
+
+    while (actual){
+        if (cumpleCondiciones(actual->value)){
+            cantidad++;
         }
-
         actual = actual->next;
     }
 
-    return contador;
+    return cantidad;
 }
+
 
 bool cumpleCondiciones(producto_t *producto){
 
-    return ((producto->estado == 1) && (producto->usuario->nivel > 0));
+    if ((producto->estado == 1) && (producto->usuario->nivel >= 1)){
+        return true;
+    } 
+
+    return false;
 
 }
