@@ -14,7 +14,6 @@ checker
 *.out
 
 # --- Entornos Virtuales de Python (venv) ---
-# Veo que tienes carpetas de python, no queremos subir todo el entorno
 venv/
 __pycache__/
 *.pyc
