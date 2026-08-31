@@ -1,3 +1,11 @@
+; registros:
+	; rdi = 
+	; rsi = 
+	; rdx = 
+	; rcx = 
+	; r8 = 
+	; r9 =    
+    
     ; === PRÓLOGO ===
     push rbp
     mov rbp, rsp

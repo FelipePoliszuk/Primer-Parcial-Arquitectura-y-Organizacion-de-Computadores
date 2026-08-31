@@ -14,7 +14,7 @@ TRUE  EQU 1
 ; Funciones a implementar:
 ;   - es_indice_ordenado
 global EJERCICIO_1A_HECHO
-EJERCICIO_1A_HECHO: db FALSE ; Cambiar por `TRUE` para correr los tests.
+EJERCICIO_1A_HECHO: db TRUE ; Cambiar por `TRUE` para correr los tests.
 
 ; Marca el ejercicio 1B como hecho (`true`) o pendiente (`false`).
 ;
@@ -25,10 +25,10 @@ EJERCICIO_1B_HECHO: db FALSE ; Cambiar por `TRUE` para correr los tests.
 
 ;########### ESTOS SON LOS OFFSETS Y TAMAÑO DE LOS STRUCTS
 ; Completar las definiciones (serán revisadas por ABI enforcer):
-ITEM_NOMBRE EQU ??
-ITEM_FUERZA EQU ??
-ITEM_DURABILIDAD EQU ??
-ITEM_SIZE EQU ??
+ITEM_NOMBRE EQU 0
+ITEM_FUERZA EQU 20
+ITEM_DURABILIDAD EQU 24
+ITEM_SIZE EQU 28
 
 ;; La funcion debe verificar si una vista del inventario está correctamente 
 ;; ordenada de acuerdo a un criterio (comparador)
@@ -55,15 +55,73 @@ ITEM_SIZE EQU ??
 
 global es_indice_ordenado
 es_indice_ordenado:
-	; Te recomendamos llenar una tablita acá con cada parámetro y su
-	; ubicación según la convención de llamada. Prestá atención a qué
-	; valores son de 64 bits y qué valores son de 32 bits o 8 bits.
-	;
-	; r/m64 = item_t**     inventario
-	; r/m64 = uint16_t*    indice
-	; r/m16 = uint16_t     tamanio
-	; r/m64 = comparador_t comparador
-		ret
+; registros:
+	; rdi = **inventario
+	; rsi =  *indice
+	; dx = tamanio
+	; rcx = comparador
+
+    ; === PRÓLOGO ===
+    push rbp
+    mov rbp, rsp
+
+    ; preservar registros callee-saved 
+    push rbx   
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
+
+	mov r12, rdi		; r12  = **inventario
+	mov r13, rsi		; r13  = *indice
+	mov r14w, dx		; r14w = tamanio 
+	mov r15, rcx		; r15  = comparador
+
+    xor rbx, rbx        ; bx = índice 
+
+	dec r14w			; tamanio - 1
+
+.loop:
+    cmp bx, r14w          ; condición de corte
+    je .retTrue
+
+	xor r8, r8        ; bx = índice 
+	xor r9, r9        ; bx = índice 
+
+	mov r8w, word[r13 + (rbx*2)]				; indice i 
+	mov r9w, word[r13 + (rbx*2) + 2]			; indice i+1
+
+	mov rdi, qword[r12 + (r8*8)]				; rdi = inventario[indice[i]]
+	mov rsi, qword[r12 + (r9*8)]				; rsi = inventario[indice[i+1]]
+
+    call r15            ; llamada a función
+
+	cmp al, 0
+	jne .siguiente
+
+.retFalse:
+	mov al, 0
+	jmp .fin 
+
+.siguiente:
+    inc bx
+    jmp .loop
+
+.retTrue:
+	mov al, 1
+
+.fin:
+    ; === EPÍLOGO ===
+    add rsp, 8          ; Deshago el alineamiento global
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    pop rbp
+    ret
+
 
 ;; Dado un inventario y una vista, crear un nuevo inventario que mantenga el
 ;; orden descrito por la misma.
