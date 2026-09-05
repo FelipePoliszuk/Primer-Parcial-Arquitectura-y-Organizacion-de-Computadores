@@ -21,7 +21,7 @@ EJERCICIO_1A_HECHO: db TRUE ; Cambiar por `TRUE` para correr los tests.
 ; Funciones a implementar:
 ;   - indice_a_inventario
 global EJERCICIO_1B_HECHO
-EJERCICIO_1B_HECHO: db FALSE ; Cambiar por `TRUE` para correr los tests.
+EJERCICIO_1B_HECHO: db TRUE ; Cambiar por `TRUE` para correr los tests.
 
 ;########### ESTOS SON LOS OFFSETS Y TAMAÑO DE LOS STRUCTS
 ; Completar las definiciones (serán revisadas por ABI enforcer):
@@ -86,11 +86,8 @@ es_indice_ordenado:
     cmp bx, r14w          ; condición de corte
     je .retTrue
 
-	xor r8, r8        ; bx = índice 
-	xor r9, r9        ; bx = índice 
-
-	mov r8w, word[r13 + (rbx*2)]				; indice i 
-	mov r9w, word[r13 + (rbx*2) + 2]			; indice i+1
+	movzx r8, word[r13 + (rbx*2)]				; r8 = indice i 
+	movzx r9, word[r13 + (rbx*2) + 2]			; r9 = indice i+1
 
 	mov rdi, qword[r12 + (r8*8)]				; rdi = inventario[indice[i]]
 	mov rsi, qword[r12 + (r9*8)]				; rsi = inventario[indice[i+1]]
@@ -122,7 +119,6 @@ es_indice_ordenado:
     pop rbp
     ret
 
-
 ;; Dado un inventario y una vista, crear un nuevo inventario que mantenga el
 ;; orden descrito por la misma.
 
@@ -143,13 +139,61 @@ es_indice_ordenado:
 ;;   `ítems`. Se pide *copiar* estos punteros, **no se deben crear ni clonar
 ;;   ítems**
 
+
 global indice_a_inventario
 indice_a_inventario:
-	; Te recomendamos llenar una tablita acá con cada parámetro y su
-	; ubicación según la convención de llamada. Prestá atención a qué
-	; valores son de 64 bits y qué valores son de 32 bits o 8 bits.
-	;
-	; r/m64 = item_t**  inventario
-	; r/m64 = uint16_t* indice
-	; r/m16 = uint16_t  tamanio
-	ret
+; registros:
+	; rdi = **inventario
+	; rsi =  *indice
+	; dx = tamanio
+
+    ; === PRÓLOGO ===
+    push rbp
+    mov rbp, rsp
+
+    ; preservar registros callee-saved 
+    push rbx   
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
+
+	mov r12, rdi		; r12  = **inventario
+	mov r13, rsi		; r13  = *indice
+	mov r14w, dx		; r14w = tamanio 
+
+	movzx rdi, r14w		; rdi = tamaño
+
+    imul rdi, 8 		; tamaño*8
+
+	call malloc
+
+	mov r15, rax		 ; r15 = **resultado 
+
+	xor rbx, rbx        ; bx = índice 
+
+.loop:
+    cmp bx, r14w          ; condición de corte
+    je .fin
+
+	movzx r8, word[r13 + (rbx*2)]				; indice i 
+	mov rdi, qword[r12 + (r8*8)]				; rdi = inventario[indice[i]]
+
+	mov qword[r15 + (rbx*8)], rdi 				; resultado[i] = inventario[indice[i]];
+
+.siguiente:
+    inc bx
+    jmp .loop
+
+.fin:
+	mov rax, r15
+    ; === EPÍLOGO ===
+    add rsp, 8          ; Deshago el alineamiento global
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    pop rbp
+    ret

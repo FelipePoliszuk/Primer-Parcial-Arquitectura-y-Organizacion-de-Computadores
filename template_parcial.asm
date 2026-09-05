@@ -17,6 +17,7 @@
     push r14
     push r15
     sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
+    
 
     ; -------------------
     ; Código de inicialización
