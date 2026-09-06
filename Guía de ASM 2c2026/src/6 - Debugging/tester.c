@@ -157,6 +157,7 @@ void test_3_dos_elementos(){
 	uint32_t res = 0;
 	uint32_t array[] = {2,3};
 	res = ejercicio3(array, 2, fun_ej_3);
+	printf("El resultado es: %d\n", res);
 	testResultMessage(61 == res, "test 3.3");
 }
 
@@ -215,6 +216,11 @@ void test_4_un_elemento(){
 	
 	uint32_t array_res[] = {80};
 	uint32_t* array = ejercicio4(array_inicial, 1, 8);
+
+	printf("%d\n", array_res[0]);
+	printf("%d\n", array[0]);
+	printf("%d\n", array_inicial[0]);
+		
 	testResults4(array_res, array, array_inicial, 1, "test 4.1");
 	free(array);
 }
