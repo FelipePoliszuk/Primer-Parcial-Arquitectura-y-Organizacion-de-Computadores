@@ -193,7 +193,9 @@ TEST(ej2_resolver_automaticamente) {
 
     caso_t casos_a_revisar2[3];
     TEST_CALL_V(resolver_automaticamente, funcionCierraCasos, casos_test2, casos_a_revisar2, 3);
-    
+    printf("%d",casos_test2[0].estado);
+    printf("%d",casos_test2[1].estado);
+    printf("%d",casos_test2[2].estado);
     failed = false;
     
     // Verificar que los casos con resultado 1 se cerraron favorablemente (estado = 1)

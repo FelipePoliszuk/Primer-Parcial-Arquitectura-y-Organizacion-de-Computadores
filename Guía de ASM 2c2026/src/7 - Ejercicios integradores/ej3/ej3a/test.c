@@ -204,6 +204,8 @@ TEST(ej1_segmentar_casos) {
     };
 
     segmentacion_t* seg2 = TEST_CALL_S(segmentar_casos, casos_test2, 3);
+    // printf("%d", seg2->casos_nivel_0);
+
     failed = false;
     
     if (!seg2) {
