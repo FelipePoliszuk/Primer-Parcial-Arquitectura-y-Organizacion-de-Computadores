@@ -4,7 +4,7 @@
 
 void resolver_automaticamente(funcionCierraCasos_t* funcion, caso_t* arreglo_casos, caso_t* casos_a_revisar, int largo){
 
-    int j = 0;
+    // int j = 0;
 
     for (size_t i = 0; i < largo; i++){
 
@@ -21,16 +21,16 @@ void resolver_automaticamente(funcionCierraCasos_t* funcion, caso_t* arreglo_cas
                 if (((strncmp(caso->categoria, "CLT",4) == 0) || (strncmp(caso->categoria, "RBO",4) == 0))){
                     caso->estado = 2;
                 } else {
-                    casos_a_revisar[j] = *caso;
-                    j++;
+                    // casos_a_revisar[j] = *caso;
+                    // j++;
                 }
             }  
         }
         
-        if (nivel == 0){
-            casos_a_revisar[j] = *caso;
-            j++;
-        }        
+        // if (nivel == 0){
+        //     casos_a_revisar[j] = *caso;
+        //     j++;
+        // }        
      
     }
 

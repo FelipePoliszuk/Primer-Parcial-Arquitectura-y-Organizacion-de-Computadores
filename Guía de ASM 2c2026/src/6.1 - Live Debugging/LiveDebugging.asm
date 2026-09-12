@@ -16,7 +16,7 @@ FALSE EQU 0
 TRUE  EQU 1
 
 global EJERCICIO_1_HECHO
-EJERCICIO_1_HECHO: db TRUE ; Cambiar por `TRUE` para correr los tests del Ejercicio 1.
+EJERCICIO_1_HECHO: db FALSE ; Cambiar por `TRUE` para correr los tests del Ejercicio 1.
 
 global EJERCICIO_2_HECHO
 EJERCICIO_2_HECHO: db TRUE ; Cambiar por `TRUE` para correr los tests del Ejercicio 2.

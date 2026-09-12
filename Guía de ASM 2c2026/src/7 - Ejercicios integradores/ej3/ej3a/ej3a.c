@@ -6,9 +6,9 @@ int contar_casos_por_nivel(caso_t* arreglo_casos, int largo, int nivel){
     int contador = 0;
 
     for (size_t i = 0; i < largo; i++){
-        caso_t caso = arreglo_casos[i];
+        caso_t *caso = &arreglo_casos[i];
 
-        if (caso.usuario->nivel == nivel){
+        if (caso->usuario->nivel == nivel){
             contador ++;
         }
     }
@@ -108,27 +108,27 @@ segmentacion_t* segmentar_casos(caso_t* arreglo_casos, int largo) {
 //     int k = 0;
 //     int l = 0;
 
-//     for (int i = 0; i < largo; i++){
+    // for (int i = 0; i < largo; i++){
 
-//         caso_t caso = arreglo_casos[i];
-//         uint32_t nivel = caso.usuario->nivel;
+    //     caso_t caso = arreglo_casos[i];
+    //     uint32_t nivel = caso.usuario->nivel;
 
-//         if (nivel == 0){
-//             resultado->casos_nivel_0[j] = caso;
-//             j++;
-//         }
+    //     if (nivel == 0){
+    //         resultado->casos_nivel_0[j] = caso;
+    //         j++;
+    //     }
 
-//         if (nivel == 1){
-//             resultado->casos_nivel_1[k] = caso;
-//             k++;
-//         }
+    //     if (nivel == 1){
+    //         resultado->casos_nivel_1[k] = caso;
+    //         k++;
+    //     }
         
-//         if (nivel == 2){
-//             resultado->casos_nivel_2[l] = caso;
-//             l++;
-//         }        
+    //     if (nivel == 2){
+    //         resultado->casos_nivel_2[l] = caso;
+    //         l++;
+    //     }        
         
-//     }
+    // }
     
 //     return resultado;
 
