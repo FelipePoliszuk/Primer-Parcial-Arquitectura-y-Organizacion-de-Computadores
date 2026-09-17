@@ -510,7 +510,7 @@ TEST(ej2_resolver_automaticamente) {
         crear_caso(2, 1, "CLTX", 5),  // CLT con caracteres extra
         crear_caso(2, 1, "RBOY", 6)   // RBO con caracteres extra
     };
-
+    
     caso_t casos_a_revisar9[6];
     TEST_CALL_V(resolver_automaticamente, funcionCierraCasos, casos_test9, casos_a_revisar9, 6);
     

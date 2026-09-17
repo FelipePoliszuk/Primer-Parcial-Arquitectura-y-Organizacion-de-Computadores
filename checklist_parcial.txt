@@ -1,0 +1,23 @@
+Hardware y Sistema
+
+    Periféricos: Verificar que el monitor, mouse y teclado respondan correctamente.
+
+    Distribución de teclado: Configurar el idioma correcto en el sistema operativo. Hacer una prueba rápida de tipeo con los caracteres más usados: corchetes [], llaves {}, punteros ->, ampersand & y asteriscos *.
+
+Entorno y Archivos
+
+    Repositorio: Clonar o descargar el repositorio de GitHub con los códigos, scripts y material base.
+
+    Prueba de compilación: Ejecutar un make o compilar un archivo de prueba rápido con gcc y nasm para confirmar que las herramientas del sistema funcionan bien antes de quedarte sin internet.
+
+Configuración de VS Code
+
+    Extensiones principales: Instalar x86 and x86_64 Assembly, C/C++, y C/C++ Extension Pack.
+
+    Atajos de teclado: Ir a File > Preferences > Keyboard Shortcuts y asignar:
+
+        Add Line Comment = Ctrl + R
+
+        Remove Line Comment = Ctrl + Shift + R
+
+    Verificación de IntelliSense: Escribir un bloque if para ver si autocompleta la estructura, y tipear el nombre de un struct seguido de un punto . o flecha -> para confirmar que sugiera los campos internos.
