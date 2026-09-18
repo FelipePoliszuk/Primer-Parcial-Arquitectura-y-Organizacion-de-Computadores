@@ -12,7 +12,7 @@ void bloquearUsuario(usuario_t *usuario, usuario_t *usuarioABloquear){
 
 void bloquearUsuario_aux(feed_t *feed, usuario_t *usuario){
 
-  // "indirecto" apunta a la flecha que apunta al nodo actual
+  // indirecto apunta a la flecha que apunta al nodo actual
   publicacion_t **indirecto = &(feed->first);
   
   while (*indirecto){
@@ -24,12 +24,10 @@ void bloquearUsuario_aux(feed_t *feed, usuario_t *usuario){
         *indirecto = actual->next;
       free(actual);
     } else {
-      // Si no lo borramos, avanzamos NUESTRA flecha al "next" del nodo actual
+      // Si no lo borramos, avanzamos NUESTRA flecha al next del nodo actual
       indirecto = &(actual->next);
     }
-    
   }
-
 }
 
 // void bloquearUsuario_aux(feed_t *feed, usuario_t *usuario){
