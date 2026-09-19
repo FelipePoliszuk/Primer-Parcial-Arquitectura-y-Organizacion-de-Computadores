@@ -152,3 +152,14 @@ Mapa conceptual de la Pila respecto a RBP
     [rbp - 16] -> Tu segunda variable local
 
     [rbp - 24] -> Tu tercera variable local
+
+
+
+
+
+
+
+
+Primer corchete (i): Eje Y / Filas / Alto.
+
+Segundo corchete (j): Eje X / Columnas / Ancho.

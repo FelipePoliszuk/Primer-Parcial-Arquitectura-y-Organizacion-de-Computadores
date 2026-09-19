@@ -20,21 +20,27 @@ extern strcmp
 
 ;########### ESTOS SON LOS OFFSETS Y TAMAÑO DE LOS STRUCTS
 ; Completar las definiciones (serán revisadas por ABI enforcer):
-carta.en_juego EQU NO_COMPLETADO
-carta.nombre   EQU NO_COMPLETADO
-carta.vida     EQU NO_COMPLETADO
-carta.jugador  EQU NO_COMPLETADO
-carta.SIZE     EQU NO_COMPLETADO
+carta.en_juego EQU 0
+carta.nombre   EQU 1
+carta.vida     EQU 14
+carta.jugador  EQU 16
+; ---------------------------------
+carta.SIZE     EQU 18
 
-tablero.mano_jugador_rojo EQU NO_COMPLETADO
-tablero.mano_jugador_azul EQU NO_COMPLETADO
-tablero.campo             EQU NO_COMPLETADO
-tablero.SIZE              EQU NO_COMPLETADO
 
-accion.invocar   EQU NO_COMPLETADO
-accion.destino   EQU NO_COMPLETADO
-accion.siguiente EQU NO_COMPLETADO
-accion.SIZE      EQU NO_COMPLETADO
+tablero.mano_jugador_rojo EQU 0
+tablero.mano_jugador_azul EQU 8
+tablero.campo             EQU 16
+; ---------------------------------
+
+tablero.SIZE              EQU 416
+
+
+accion.invocar   EQU 0
+accion.destino   EQU 8
+accion.siguiente EQU 16
+; ---------------------------------
+accion.SIZE      EQU 24
 
 ; Variables globales de sólo lectura
 section .rodata
@@ -44,21 +50,21 @@ section .rodata
 ; Funciones a implementar:
 ;   - hay_accion_que_toque
 global EJERCICIO_1_HECHO
-EJERCICIO_1_HECHO: db FALSE
+EJERCICIO_1_HECHO: db TRUE
 
 ; Marca el ejercicio 2 como hecho (`true`) o pendiente (`false`).
 ;
 ; Funciones a implementar:
 ;   - invocar_acciones
 global EJERCICIO_2_HECHO
-EJERCICIO_2_HECHO: db FALSE
+EJERCICIO_2_HECHO: db TRUE
 
 ; Marca el ejercicio 3 como hecho (`true`) o pendiente (`false`).
 ;
 ; Funciones a implementar:
 ;   - contar_cartas
 global EJERCICIO_3_HECHO
-EJERCICIO_3_HECHO: db FALSE
+EJERCICIO_3_HECHO: db TRUE
 
 section .text
 
@@ -76,14 +82,51 @@ section .text
 ; ```
 global hay_accion_que_toque
 hay_accion_que_toque:
-	; Te recomendamos llenar una tablita acá con cada parámetro y su
-	; ubicación según la convención de llamada. Prestá atención a qué
-	; valores son de 64 bits y qué valores son de 32 bits o 8 bits.
-	;
-	; r/m64 = accion_t*  accion
-	; r/m64 = char*      nombre
-	xor rax, rax
-	ret
+; registros:
+	; rdi = *accion
+	; rsi = *nombre
+    
+    ; === PRÓLOGO ===
+    push rbp
+    mov rbp, rsp
+
+    ; preservar registros callee-saved 
+    push r12
+    push r13
+    
+    mov r12, rdi 		; r12 = *accion
+    mov r13, rsi 		; r13 = *nombre		
+
+.loop:
+    test r12, r12          ; condición de corte
+    je .devuelvoFalse
+
+	mov rdi, qword[r12 + accion.destino] 
+	lea rdi, [rdi + carta.nombre] 
+
+	mov rsi, r13			; rsi = *nombre
+    call strcmp             ; llamada a función
+
+	test al, al 
+	jnz .siguiente
+
+	mov rax, 1		; True
+	jmp .fin
+
+.siguiente:
+    mov r12, qword[r12 + accion.siguiente]
+    jmp .loop
+
+.devuelvoFalse:
+	mov rax, 0		; False
+
+.fin:
+    ; === EPÍLOGO ===
+    pop r13
+    pop r12
+    pop rbp
+    ret
+
 
 ; Invoca las acciones que fueron encoladas en la secuencia proporcionada en el
 ; primer parámetro.
@@ -110,13 +153,57 @@ hay_accion_que_toque:
 ; ```
 global invocar_acciones
 invocar_acciones:
-	; Te recomendamos llenar una tablita acá con cada parámetro y su
-	; ubicación según la convención de llamada. Prestá atención a qué
-	; valores son de 64 bits y qué valores son de 32 bits o 8 bits.
-	;
-	; r/m64 = accion_t*  accion
-	; r/m64 = tablero_t* tablero
-	ret
+; registros:
+	; rdi = *accion
+	; rsi = *tablero
+    
+    ; === PRÓLOGO ===
+    push rbp
+    mov rbp, rsp
+
+    ; preservar registros callee-saved 
+    push rbx   
+    push r12
+    push r13
+    sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
+    
+    mov r12, rdi 		; r12 = *accion =  actual
+    mov r13, rsi 		; r13 = *tablero		
+
+.loop:
+    test r12, r12          ; condición de corte
+    je .fin
+
+	mov rbx, qword[r12 + accion.destino]		; rbx = *carta
+
+	cmp byte[rbx + carta.en_juego], FALSE
+	je .siguiente
+
+	mov r9, qword[r12 + accion.invocar] 		; r9 = actual->invocar
+	
+	mov rdi, r13			; rdi = *tablero
+	mov rsi, rbx			; rsi = *carta
+	
+	call r9		; actual->invocar(tablero, carta);
+
+	cmp word[rbx + carta.vida], 0
+	jne .siguiente
+
+	mov byte[rbx + carta.en_juego], FALSE
+
+.siguiente:
+    mov r12, qword[r12 + accion.siguiente]
+    jmp .loop
+
+.fin:
+    ; === EPÍLOGO ===
+    add rsp, 8          ; Deshago el alineamiento global
+    pop r13
+    pop r12
+    pop rbx
+    pop rbp
+    ret
+
 
 ; Cuenta la cantidad de cartas rojas y azules en el tablero.
 ;
@@ -139,11 +226,51 @@ invocar_acciones:
 ; ```
 global contar_cartas
 contar_cartas:
-	; Te recomendamos llenar una tablita acá con cada parámetro y su
-	; ubicación según la convención de llamada. Prestá atención a qué
-	; valores son de 64 bits y qué valores son de 32 bits o 8 bits.
-	;
-	; r/m64 = tablero_t* tablero
-	; r/m64 = uint32_t*  cant_rojas
-	; r/m64 = uint32_t*  cant_azules
-	ret
+; registros:
+	; rdi = *tablero
+	; rsi = *cant_rojas
+	; rdx = *cant_azules
+    
+    ; === PRÓLOGO ===
+    push rbp
+    mov rbp, rsp
+    
+	xor r8, r8			; r8d = cantidad_rojas = 0
+	xor r9, r9			; r9d = cantidad_azules = 0
+
+    xor r10, r10        ; r10 = índice = 0
+
+.loop:
+    cmp r10, 50          ; tablero.ALTO * tablero.ANCHO 
+    je .fin
+
+	mov r11, qword[rdi + tablero.campo + (r10*8)]		; r10 = tablero->campo[i][j]
+
+	test r11, r11	
+	jz .siguiente
+
+	cmp byte[r11 + carta.jugador], JUGADOR_ROJO
+	je .sumoRojo
+
+	cmp byte[r11 + carta.jugador], JUGADOR_AZUL
+	je .sumoAzul
+	
+.siguiente:
+    inc r10
+    jmp .loop
+
+.sumoRojo:
+	inc r8d
+	jmp .siguiente
+
+.sumoAzul:
+	inc r9d
+	jmp .siguiente	
+
+.fin:
+    mov dword[rsi], r8d       ; *cant_rojas = cantidad_rojas;
+    mov dword[rdx], r9d       ; *cant_azules = cantidad_azules;
+
+    ; === EPÍLOGO ===
+    pop rbp
+    ret
