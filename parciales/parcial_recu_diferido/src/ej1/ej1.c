@@ -5,71 +5,13 @@ bool canItemFitInBackpack(backpack_t *backpack, item_t *item) {
 
     uint8_t pesoMochila = 0;
 
-    for (size_t i = 0; i < backpack->item_count; i++){
+    for (uint32_t i = 0; i < backpack->item_count; i++){
         pesoMochila += backpack->items[i].weight;
     }
 
-    if ((pesoMochila + item->weight) > backpack->max_weight){
-        return false;
+    if (pesoMochila + item->weight <= backpack->max_weight){
+        return true;
     }
-
-    return true;
+    
+    return false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// bool canItemFitInBackpack(backpack_t *backpack, item_t *item) {
-
-//   uint8_t peso_acumulado = 0;
-
-//   for (size_t i = 0; i < backpack->item_count; i++){
-//     peso_acumulado += backpack->items[i].weight;
-//   }
-
-//   if ((item->weight + peso_acumulado) > backpack->max_weight){
-//     return false;
-//   }
-  
-//   return true;
-// }

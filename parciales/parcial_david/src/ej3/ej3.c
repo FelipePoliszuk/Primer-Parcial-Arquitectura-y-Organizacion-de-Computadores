@@ -17,7 +17,6 @@ usuario_t** asignarNivelesParaNuevosUsuarios(uint32_t *ids, uint32_t cantidadDeI
         nuevo_usuario->nivel = deQueNivelEs(ids[i]);
 
         arreglo[i] = nuevo_usuario;
-
         
     }
 

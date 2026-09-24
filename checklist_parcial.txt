@@ -14,6 +14,8 @@ Configuración de VS Code
 
     Extensiones principales: Instalar x86 and x86_64 Assembly, C/C++, y C/C++ Extension Pack.
 
+    Chequear que funcione GDB
+
     Atajos de teclado: Ir a File > Preferences > Keyboard Shortcuts y asignar:
 
         Add Line Comment = Ctrl + R
