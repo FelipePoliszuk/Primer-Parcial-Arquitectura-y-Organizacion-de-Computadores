@@ -8,14 +8,13 @@ section .data
 section .text
 
 ; COMPLETAR las definiciones (serán revisadas por ABI enforcer):
-; ------------------------
 ; Contenido
 ; ------------------------
 CONT_NOMBRE_OFFSET      EQU 0      ; char nombre[64]
 CONT_VALOR_OFFSET       EQU 64      ; uint32_t valor
 CONT_COLOR_OFFSET       EQU 68      ; char color[32]
 CONT_ES_TESORO_OFFSET   EQU 100      ; bool es_tesoro
-CONT_PESO_OFFSET        EQU 104      ; float peso
+CONT_PESO_OFFSET        EQU 104      ; float peso        // 4 bytes
 
 CONT_SIZE               EQU 108      ; sizeof(Contenido) (rounded)
 
@@ -24,7 +23,10 @@ CONT_SIZE               EQU 108      ; sizeof(Contenido) (rounded)
 ; ------------------------
 HAB_ID_OFFSET          EQU 0         ; uint32_t id
 HAB_VECINOS_OFFSET     EQU 4         ; uint32_t vecinos[ACC_CANT] (4 entradas)
+
 HAB_CONTENIDO_OFFSET   EQU 20        ; Contenido contenido (aligned to 4)
+; cuando se alinea con padding sobre otra estructura se alinea a el mayor  de esa struct?
+
 HAB_VISITAS_OFFSET     EQU 128       ; uint32_t visitas
 
 HAB_SIZE               EQU 132       ; sizeof(Habitacion)
@@ -84,8 +86,8 @@ sumarTesoros:
     
     mov rax, r13
 
-    imul rax, HAB_SIZE  ; rax = actual * sizeof(Habitacion)
-    add r9, rax              ; r9 = mapa->habitaciones[actual]
+    imul rax, HAB_SIZE           ; rax = actual * sizeof(Habitacion)
+    add r9, rax                  ; r9 = mapa->habitaciones[actual]
 
     cmp byte[r9 + HAB_CONTENIDO_OFFSET + CONT_ES_TESORO_OFFSET], 0      
     je .noSumo      ; si no es tesoro, salto
@@ -132,6 +134,3 @@ sumarTesoros:
     pop rbx
     pop rbp
     ret
-
-
-    

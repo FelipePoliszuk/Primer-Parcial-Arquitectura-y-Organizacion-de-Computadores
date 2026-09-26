@@ -123,7 +123,10 @@ TEST(test_ej1_mapa_simple_recorrido_invalido_y_no_encuentra_tesoro) {
   TEST_ASSERT(rec != NULL);
 
   uint64_t acciones_ejecutadas = 0;
+//   printf("%d",acciones_ejecutadas);
   bool found = TEST_CALL_B(encontrarTesoroEnMapa, mapa, rec, &acciones_ejecutadas);
+//   printf("%d",acciones_ejecutadas);
+
   TEST_ASSERT(acciones_ejecutadas == 0);
   TEST_ASSERT(!found);
 
@@ -140,7 +143,10 @@ TEST(test_ej1_mapa_simple_recorrido_valido_y_no_encuentra_tesoro) {
   TEST_ASSERT(rec != NULL);
 
   uint64_t acciones_ejecutadas = 0;
+  // printf("%lu\n", acciones_ejecutadas);
   bool found = TEST_CALL_B(encontrarTesoroEnMapa, mapa, rec, &acciones_ejecutadas);
+  // printf("%lu\n", acciones_ejecutadas);
+
   TEST_ASSERT(acciones_ejecutadas == 1);
   TEST_ASSERT(!found);
 

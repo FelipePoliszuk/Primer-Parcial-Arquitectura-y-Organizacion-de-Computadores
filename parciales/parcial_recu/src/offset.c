@@ -32,6 +32,11 @@ int main() {
 // ./offsets
 
 
+
+
+
+
+
 	// ;prologo
 	// push rbp	;alineado
 	// mov rbp, rsp
