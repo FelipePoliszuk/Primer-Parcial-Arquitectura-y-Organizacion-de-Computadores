@@ -1,0 +1,52 @@
+1 - Inventario:
+	Diferentes tipos de orden con el índice
+	items_danio[i] = inventario[indices_danio[i]];
+
+2 - Organized Wars - mapa:
+	Matriz de punteros a structs(igual que integrador 5)
+
+3 - Orga2-Morgan - banco:
+	arreglo structs de 16 bytes (es diferente la iteracion - add 16)
+	strncmp
+	muchos ifs
+
+4 - Cartas Ah-Yi-Ok! 1.0:
+	funciones dentro de struct
+	recursión
+
+5 - Cartas Ah-Yi-Ok! 2.0:
+	carta_t* campo[ALTO_CAMPO][ANCHO_CAMPO]; matriz de punteros
+
+---------------------------------------------------------------------------
+
+Primer parcial (twitter-furfi):
+	borrar nodo lista enlazada
+
+Primer parcial (david):
+	borrar nodos posteriores de lista enlazada
+	devolver arreglo (malloc) de punteros a usuarios (malloc) (malloc dentro de for)
+	uso la pila para guardar variables
+	lea para hacer calculos más rapidos
+
+Recu diferido (mochilas):
+	enum
+	movzx en asm
+	borrar nodo lista enlazada
+	free distinto liberando TODA la mem de un puntero
+	uso la pila para guardar variables
+	devolver mochila que adentro tiene arreglo (for adentro de while) (doble malloc) 
+
+
+Recu (tesoros):
+	*acciones_ejecutadas = 0; ...
+	accesos horribles como: mapa->habitaciones[actual].contenido.es_tesoro
+				mapa->habitaciones[actual].vecinos[indice]
+				mapa->habitaciones[proxima_habitacion].contenido.es_tesoro
+	accesos a habitación de 132 bytes con add []
+	enum
+	agregar items a un array de forma INVERSA
+	
+	recursión
+
+
+
