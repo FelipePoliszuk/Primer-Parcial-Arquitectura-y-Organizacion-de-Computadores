@@ -86,27 +86,27 @@ es_indice_ordenado:
     cmp bx, r14w          ; condición de corte
     je .retTrue
 
-	movzx r8, word[r13 + (rbx*2)]				; r8 = indice i 
-	movzx r9, word[r13 + (rbx*2) + 2]			; r9 = indice i+1
+	movzx r8, word[r13 + (rbx*2)]				; r8 = indice[i]
+	movzx r9, word[r13 + (rbx*2) + 2]			; r9 = indice[i+1]
 
 	mov rdi, qword[r12 + (r8*8)]				; rdi = inventario[indice[i]]
 	mov rsi, qword[r12 + (r9*8)]				; rsi = inventario[indice[i+1]]
 
     call r15            ; llamada a función
 
-	cmp al, 0
-	jne .siguiente
-
-.retFalse:
-	mov al, 0
-	jmp .fin 
+	test al, al
+	jz .retFalse
 
 .siguiente:
     inc bx
     jmp .loop
 
+.retFalse:
+	mov al, FALSE
+	jmp .fin 
+
 .retTrue:
-	mov al, 1
+	mov al, TRUE
 
 .fin:
     ; === EPÍLOGO ===
@@ -118,6 +118,7 @@ es_indice_ordenado:
     pop rbx
     pop rbp
     ret
+
 
 ;; Dado un inventario y una vista, crear un nuevo inventario que mantenga el
 ;; orden descrito por la misma.
@@ -139,7 +140,6 @@ es_indice_ordenado:
 ;;   `ítems`. Se pide *copiar* estos punteros, **no se deben crear ni clonar
 ;;   ítems**
 
-
 global indice_a_inventario
 indice_a_inventario:
 ; registros:
@@ -158,36 +158,36 @@ indice_a_inventario:
     push r14
     push r15
     sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
-
+    
 	mov r12, rdi		; r12  = **inventario
 	mov r13, rsi		; r13  = *indice
-	mov r14w, dx		; r14w = tamanio 
+    movzx r14d, dx      ; r14w = tamanio
 
-	movzx rdi, r14w		; rdi = tamaño
+    mov rdi, 8
+    imul rdi, r14      ; sizeof(item_t*)*tamanio
 
-    imul rdi, 8 		; tamaño*8
+    call malloc         
 
-	call malloc
+    mov r15, rax        ; r15 = **nuevo_inventario
 
-	mov r15, rax		 ; r15 = **resultado 
-
-	xor rbx, rbx        ; bx = índice 
+    xor rbx, rbx        ; rbx = índice = 0
 
 .loop:
     cmp bx, r14w          ; condición de corte
     je .fin
 
-	movzx r8, word[r13 + (rbx*2)]				; indice i 
-	mov rdi, qword[r12 + (r8*8)]				; rdi = inventario[indice[i]]
+	movzx r8, word[r13 + (rbx*2)]   	; r8 = indice[i]
+	mov r8, qword[r12 + (r8*8)] 		; r8 = inventario[indice[i]]
 
-	mov qword[r15 + (rbx*8)], rdi 				; resultado[i] = inventario[indice[i]];
+    mov qword[r15 + (rbx*8)], r8        ; nuevo_inventario[i] = inventario[indice[i]];
 
 .siguiente:
     inc bx
     jmp .loop
 
 .fin:
-	mov rax, r15
+    mov rax, r15       
+
     ; === EPÍLOGO ===
     add rsp, 8          ; Deshago el alineamiento global
     pop r15

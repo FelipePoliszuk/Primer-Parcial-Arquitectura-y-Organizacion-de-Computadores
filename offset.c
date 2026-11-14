@@ -21,7 +21,6 @@ int main() {
 // gcc -o offsets offset.c 
 // ./offsets
 
-
 	// ;prologo
 	// push rbp	;alineado
 	// mov rbp, rsp
@@ -31,7 +30,6 @@ int main() {
 	// push r15	;alineado
 	// push rbx	;desalineado
 	// sub rsp, 8	;alineado
-
 
     // .fin:
 
