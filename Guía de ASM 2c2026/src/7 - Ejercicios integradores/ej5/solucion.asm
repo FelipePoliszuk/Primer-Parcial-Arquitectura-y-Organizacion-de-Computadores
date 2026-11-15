@@ -27,14 +27,12 @@ carta.jugador  EQU 16
 ; ---------------------------------
 carta.SIZE     EQU 18
 
-
 tablero.mano_jugador_rojo EQU 0
 tablero.mano_jugador_azul EQU 8
 tablero.campo             EQU 16
 ; ---------------------------------
 
 tablero.SIZE              EQU 416
-
 
 accion.invocar   EQU 0
 accion.destino   EQU 8
@@ -94,31 +92,33 @@ hay_accion_que_toque:
     push r12
     push r13
     
-    mov r12, rdi 		; r12 = *accion
-    mov r13, rsi 		; r13 = *nombre		
+    mov r12, rdi        ; r12 = *accion
+    mov r13, rsi        ; r13 = *nombre
 
 .loop:
-    test r12, r12          ; condición de corte
-    je .devuelvoFalse
+    test r12, r12       ; condición de corte
+    jz .retFalse
 
-	mov rdi, qword[r12 + accion.destino] 
-	lea rdi, [rdi + carta.nombre] 
+    mov rdi, r13                            ; rdi = *nombre
+    
+    mov rsi, qword[r12 + accion.destino]
+    lea rsi, [rsi + carta.nombre]           ; rsi = accion->destino->nombre
 
-	mov rsi, r13			; rsi = *nombre
-    call strcmp             ; llamada a función
+    call strcmp
 
-	test al, al 
-	jnz .siguiente
-
-	mov rax, 1		; True
-	jmp .fin
+    test eax, eax 
+    jz .retTrue
 
 .siguiente:
-    mov r12, qword[r12 + accion.siguiente]
+    mov r12, [r12 + accion.siguiente]       ; accion = accion->siguiente;
     jmp .loop
 
-.devuelvoFalse:
-	mov rax, 0		; False
+.retTrue:
+    mov rax, TRUE    
+    jmp .fin
+
+.retFalse:
+    mov rax, FALSE
 
 .fin:
     ; === EPÍLOGO ===
@@ -126,7 +126,6 @@ hay_accion_que_toque:
     pop r12
     pop rbp
     ret
-
 
 ; Invoca las acciones que fueron encoladas en la secuencia proporcionada en el
 ; primer parámetro.
@@ -162,48 +161,47 @@ invocar_acciones:
     mov rbp, rsp
 
     ; preservar registros callee-saved 
-    push rbx   
     push r12
     push r13
+    push r14
     sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
     
-    mov r12, rdi 		; r12 = *accion =  actual
-    mov r13, rsi 		; r13 = *tablero		
+    mov r12, rdi        ; r12 = *accion
+    mov r13, rsi        ; r13 = *tablero
 
 .loop:
-    test r12, r12          ; condición de corte
-    je .fin
+    test r12, r12       ; condición de corte
+    jz .fin
 
-	mov rbx, qword[r12 + accion.destino]		; rbx = *carta
+    mov r14, qword[r12 + accion.destino]     ; r14 = *carta
 
-	cmp byte[rbx + carta.en_juego], FALSE
-	je .siguiente
+    cmp byte[r14 + carta.en_juego], byte 0        ; if (carta->en_juego)
+    je .siguiente
 
-	mov r9, qword[r12 + accion.invocar] 		; r9 = actual->invocar
-	
-	mov rdi, r13			; rdi = *tablero
-	mov rsi, rbx			; rsi = *carta
-	
-	call r9		; actual->invocar(tablero, carta);
+    mov r8, qword[r12 + accion.invocar]     ; r8 = accion->invocar
 
-	cmp word[rbx + carta.vida], 0
-	jne .siguiente
+    mov rdi, r13    ; rdi = *tablero
+    mov rsi, r14    ; rsi = *carta
 
-	mov byte[rbx + carta.en_juego], FALSE
+    call r8         ; accion->invocar(tablero, carta);
+
+    cmp word[r14 + carta.vida], 0
+    jne .siguiente
+
+    mov byte[r14 + carta.en_juego], FALSE
 
 .siguiente:
-    mov r12, qword[r12 + accion.siguiente]
+    mov r12, [r12 + accion.siguiente]       ; accion = accion->siguiente;
     jmp .loop
 
 .fin:
     ; === EPÍLOGO ===
     add rsp, 8          ; Deshago el alineamiento global
+    pop r14
     pop r13
     pop r12
-    pop rbx
     pop rbp
     ret
-
 
 ; Cuenta la cantidad de cartas rojas y azules en el tablero.
 ;
@@ -230,46 +228,45 @@ contar_cartas:
 	; rdi = *tablero
 	; rsi = *cant_rojas
 	; rdx = *cant_azules
-    
+
     ; === PRÓLOGO ===
     push rbp
     mov rbp, rsp
-    
-	xor r8, r8			; r8d = cantidad_rojas = 0
-	xor r9, r9			; r9d = cantidad_azules = 0
 
-    xor r10, r10        ; r10 = índice = 0
+    xor r8, r8        ; r8d = contador_rojas  = 0
+    xor r9, r9        ; r9d = contador_azules = 0
+
+    xor r10, r10      ; r10 = índice = 0
 
 .loop:
-    cmp r10, 50          ; tablero.ALTO * tablero.ANCHO 
+    cmp r10, tablero.ALTO * tablero.ANCHO          ; condición de corte
     je .fin
 
-	mov r11, qword[rdi + tablero.campo + (r10*8)]		; r10 = tablero->campo[i][j]
+    mov r11, qword[rdi + tablero.campo + (r10*8)] ; r11 = tablero->campo[i][j]
+    
+    test r11, r11
+    jz .siguiente
 
-	test r11, r11	
-	jz .siguiente
+    cmp byte[r11 + carta.jugador], JUGADOR_ROJO
+    je .sumoRojo
 
-	cmp byte[r11 + carta.jugador], JUGADOR_ROJO
-	je .sumoRojo
+    cmp byte[r11 + carta.jugador], JUGADOR_AZUL
+    jne .siguiente
 
-	cmp byte[r11 + carta.jugador], JUGADOR_AZUL
-	je .sumoAzul
-	
+    .sumoAzul:
+    inc r9d 
+    jmp .siguiente
+
+    .sumoRojo:
+    inc r8d 
+
 .siguiente:
     inc r10
     jmp .loop
 
-.sumoRojo:
-	inc r8d
-	jmp .siguiente
-
-.sumoAzul:
-	inc r9d
-	jmp .siguiente	
-
 .fin:
-    mov dword[rsi], r8d       ; *cant_rojas = cantidad_rojas;
-    mov dword[rdx], r9d       ; *cant_azules = cantidad_azules;
+    mov dword[rsi], r8d      ; *cant_rojas = contador_rojas;
+    mov dword[rdx], r9d      ; *cant_azules = contador_azules;
 
     ; === EPÍLOGO ===
     pop rbp

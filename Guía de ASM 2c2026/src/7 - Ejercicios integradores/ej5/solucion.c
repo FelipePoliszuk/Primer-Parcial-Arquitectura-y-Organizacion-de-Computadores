@@ -38,20 +38,15 @@ bool EJERCICIO_3_HECHO = true;
  *   - Cualquier otro valor es `true`
  */
 bool hay_accion_que_toque(accion_t* accion, char* nombre) {
-	
-	accion_t *actual = accion;
 
-	while (actual){
+	while (accion){
 
-		if ((strcmp(actual->destino->nombre, nombre)) == 0){
+		if (strcmp(nombre, accion->destino->nombre) == 0){
 			return true;
 		}
-		
-		actual = actual->siguiente;
+		accion = accion->siguiente;
 	}
-
 	return false;
-
 }
 
 /**
@@ -77,22 +72,19 @@ bool hay_accion_que_toque(accion_t* accion, char* nombre) {
  */
 void invocar_acciones(accion_t* accion, tablero_t* tablero) {
 
-	accion_t *actual = accion;
+	while (accion){
 
-	while (actual){
-		carta_t* carta = actual->destino;
-
+		carta_t* carta = accion->destino;
 		if (carta->en_juego){
-			actual->invocar(tablero, carta);
+			
+			accion->invocar(tablero, carta);
 
 			if (carta->vida == 0){
 				carta->en_juego = false;
 			}
 		}
-
-		actual = actual->siguiente;
+		accion = accion->siguiente;
 	}
-
 }
 
 /**
@@ -114,48 +106,24 @@ void invocar_acciones(accion_t* accion, tablero_t* tablero) {
  */
 void contar_cartas(tablero_t* tablero, uint32_t* cant_rojas, uint32_t* cant_azules) {
 
-	uint32_t cantidad_rojas = 0;
-	uint32_t cantidad_azules = 0;
+	uint32_t contador_rojas = 0;
+	uint32_t contador_azules = 0;
 
-	for (size_t i = 0; i < ALTO_CAMPO; i++){
-		for (size_t j = 0; j < ANCHO_CAMPO; j++){
+	for (size_t i = 0; i < ALTO_CAMPO; i++){		// FILA
+		for (size_t j = 0; j < ANCHO_CAMPO; j++){		// COLUMNA
 			
 			if (tablero->campo[i][j]){
-				if (tablero->campo[i][j]->jugador == JUGADOR_ROJO){		// jugador rojo
-					cantidad_rojas++; 
+				
+				if (tablero->campo[i][j]->jugador == JUGADOR_ROJO){
+					contador_rojas ++;
+				}  else if (tablero->campo[i][j]->jugador == JUGADOR_AZUL)
+				{
+					contador_azules ++;
 				}
-
-				if (tablero->campo[i][j]->jugador == JUGADOR_AZUL){		// jugador azul
-					cantidad_azules++; 
-				}		
 			}
 		}
 	}
-
-	*cant_rojas = cantidad_rojas;
-	*cant_azules = cantidad_azules;
-}
-
-
-// versión más corta pero "ineficiente" por los accesos a memoria dentro del for :/
-
-// void contar_cartas(tablero_t* tablero, uint32_t* cant_rojas, uint32_t* cant_azules) {
 	
-// 	*cant_rojas = 0; 
-// 	*cant_azules = 0;
-
-// 	for (size_t i = 0; i < ALTO_CAMPO; i++){
-// 		for (size_t j = 0; j < ANCHO_CAMPO; j++){
-			
-// 			if (tablero->campo[i][j]){
-// 				if (tablero->campo[i][j]->jugador == 1){		// jugador rojo
-// 					*cant_rojas += 1; 
-// 				}
-
-// 				if (tablero->campo[i][j]->jugador == 2){		// jugador azul
-// 					*cant_azules += 1; 
-// 				}		
-// 			}
-// 		}
-// 	}
-// }
+	*cant_rojas = contador_rojas;
+	*cant_azules = contador_azules;
+}
