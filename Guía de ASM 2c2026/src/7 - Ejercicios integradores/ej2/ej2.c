@@ -28,53 +28,52 @@ bool EJERCICIO_2B_HECHO = true;
  */
 bool EJERCICIO_2C_HECHO = true;
 
+
+// mapa_t es una matriz de 255×255 punteros a attackunit_t. Cada casilla mapa[i][j] es un attackunit_t*: 
+// o apunta a una unidad, o es NULL si la casilla está vacía.
+
 /**
  * OPCIONAL: implementar en C
  */
 void optimizar(mapa_t mapa, attackunit_t* compartida, uint32_t (*fun_hash)(attackunit_t*)) {
 
-    uint32_t hash_compartida = fun_hash(compartida);
+    uint32_t compartida_hash = fun_hash(compartida);
 
     for (size_t i = 0; i < 255; i++){
         for (size_t j = 0; j < 255; j++){
             if (mapa[i][j]){
-                if (hash_compartida == fun_hash(mapa[i][j]) && (compartida != mapa[i][j])){
-                    
-                    mapa[i][j]->references --;
+                if ((compartida != mapa[i][j]) && compartida_hash == fun_hash(mapa[i][j])){ 
+                        mapa[i][j]->references --;
 
-                    if (mapa[i][j]->references == 0){
-                        free(mapa[i][j]);
-                    }
-                    
-                    mapa[i][j] = compartida; 
-                    compartida->references ++;
-
+                        if (mapa[i][j]->references == 0){
+                            free(mapa[i][j]);
+                        }
+                        
+                        mapa[i][j] = compartida; 
+                        compartida->references ++;
                 }
             }
         }
     }
-
 }
-
 
 /**
  * OPCIONAL: implementar en C
  */
 uint32_t contarCombustibleAsignado(mapa_t mapa, uint16_t (*fun_combustible)(char*)) {
-
-    uint32_t combustible = 0;
+    
+    uint32_t combustible_total = 0;
 
     for (size_t i = 0; i < 255; i++){
         for (size_t j = 0; j < 255; j++){
             if (mapa[i][j]){
-                combustible += mapa[i][j]->combustible - fun_combustible(mapa[i][j]->clase);
+                combustible_total += mapa[i][j]->combustible - fun_combustible(mapa[i][j]->clase) ;
             }
         }
     }
 
-    return combustible;
+    return combustible_total;
 }
-
 
 /**
  * OPCIONAL: implementar en C
@@ -82,23 +81,22 @@ uint32_t contarCombustibleAsignado(mapa_t mapa, uint16_t (*fun_combustible)(char
 void modificarUnidad(mapa_t mapa, uint8_t x, uint8_t y, void (*fun_modificar)(attackunit_t*)) {
 
     if (mapa[x][y]){
-
         if (mapa[x][y]->references > 1){
+
+            attackunit_t* nueva_unidad = malloc(sizeof(attackunit_t));
             
+            strcpy(nueva_unidad->clase, mapa[x][y]->clase),
+            
+            nueva_unidad->combustible = mapa[x][y]->combustible;
+
+            nueva_unidad->references = 1;
             mapa[x][y]->references --;
-
-            attackunit_t* nueva_instancia = malloc(sizeof(attackunit_t));
             
-            strcpy(nueva_instancia->clase, mapa[x][y]->clase);
-            nueva_instancia->combustible = mapa[x][y]->combustible;
-            nueva_instancia->references = 1;
+            fun_modificar(nueva_unidad);
+            mapa[x][y] = nueva_unidad;
 
-            fun_modificar(nueva_instancia);
-            mapa[x][y] = nueva_instancia;
-        
-        }  else { 
+        } else{
             fun_modificar(mapa[x][y]);
         }
-
     }
 }

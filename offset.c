@@ -33,6 +33,8 @@ int main() {
 
     // .fin:
 
+// gcc -S -Og -masm=intel -fverbose-asm -fno-asynchronous-unwind-tables -fcf-protection=none -U_FORTIFY_SOURCE ej2.c -o ej2.s
+
 	// ;epilogo
 	// add rsp, 8
 	// pop rbx
