@@ -55,10 +55,11 @@ bloquearUsuario:
     mov r12, rdi        ; r12 = *usuario
     mov r13, rsi        ; r13 = *usuarioABloquear
 
-    mov r8d, dword[r12 + USUARIO_CANT_BLOQUEADOS_OFFSET]        ; r8d = usuario->cantBloqueados
+    mov r8d, dword[r12 + USUARIO_CANT_BLOQUEADOS_OFFSET]    ; r8 = usuario->cantBloqueados
 
-    mov r9, qword[r12 + USUARIO_BLOQUEADOS_OFFSET]              ; usuario->bloqueados
-    mov qword[r9 + (r8*8)], r13                                 ; usuario->bloqueados[usuario->cantBloqueados]
+    mov r9, qword[r12 + USUARIO_BLOQUEADOS_OFFSET]          ; r9 = usuario->bloqueados
+
+    mov qword[r9 + (r8*8)], r13     ; usuario->bloqueados[usuario->cantBloqueados] = usuarioABloquear;
 
     inc dword[r12 + USUARIO_CANT_BLOQUEADOS_OFFSET]
 
@@ -70,13 +71,12 @@ bloquearUsuario:
     mov rsi, r12
     call bloquearUsuario_aux    
 
-.fin:
+.fin:  
     ; === EPÍLOGO ===
     pop r13
     pop r12
     pop rbp
     ret
-
 
 ; void bloquearUsuario_aux(feed_t *feed, usuario_t *usuario);
 global bloquearUsuario_aux 
@@ -90,49 +90,46 @@ bloquearUsuario_aux:
     mov rbp, rsp
 
     ; preservar registros callee-saved 
-    push rbx   
     push r12
     push r13
     push r14
+    push r15
     
     mov r12, rdi        ; r12 = *feed
     mov r13, rsi        ; r13 = *usuario
 
-    lea rbx, [r12 + FEED_FIRST_OFFSET]      ; rbx = **indirecto = &(feed->first) 
+    lea r14, [r12 + FEED_FIRST_OFFSET]
 
 .loop:
-    cmp qword[rbx], 0          ; condición de corte
+    cmp qword[r14], 0             ; condición de corte
     je .fin
 
-    mov r14, qword[rbx]         ;r14 = *actual
+    mov r15, qword[r14]      ; r15 = *actual
 
-    mov r8, qword[r14 + PUBLICACION_VALUE_OFFSET]       ; actual->value
-    mov r8d, dword[r8 + TUIT_ID_AUTOR_OFFSET]       ; actual->value->id_autor
+    mov r9d, dword[r13 + USUARIO_ID_OFFSET]
 
-    cmp r8d, dword[r13 + USUARIO_ID_OFFSET]
-    je .borro
+    mov r8, qword[r15 + PUBLICACION_VALUE_OFFSET]
+    cmp dword[r8 + TUIT_ID_AUTOR_OFFSET], r9d       ; if (actual->value->id_autor == usuario->id)
 
-    jmp .else
+    jne .else
 
-.borro: 
+    mov r8, qword[r15 + PUBLICACION_NEXT_OFFSET]
+    mov qword[r14], r8          ; *indirecto = actual->next;
 
-    mov r8, qword[r14 + PUBLICACION_NEXT_OFFSET]
-    mov qword[rbx], r8      ; *indirecto = actual->next;
-
-    mov rdi, r14
-    call free
+    mov rdi, r15    
+    call free       ; free(actual);
 
     jmp .loop
 
 .else:
-    lea rbx, [r14 + PUBLICACION_NEXT_OFFSET]        ; indirecto = &(actual->next);
+    lea r14, qword[r15 + PUBLICACION_NEXT_OFFSET]
     jmp .loop
 
 .fin:
     ; === EPÍLOGO ===
+    pop r15
     pop r14
     pop r13
     pop r12
-    pop rbx
     pop rbp
     ret

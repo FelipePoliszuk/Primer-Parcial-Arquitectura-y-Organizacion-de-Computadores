@@ -37,7 +37,6 @@ USUARIO_ID_OFFSET EQU 52
 ; ---------------------------------
 USUARIO_SIZE EQU 56
 
-
 ; tuit_t **trendingTopic(usuario_t *usuario, uint8_t (*esTuitSobresaliente)(tuit_t *));
 global trendingTopic 
 trendingTopic:
@@ -55,48 +54,49 @@ trendingTopic:
     push r13
     push r14
     push r15
-    sub rsp, 8
+    sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
     
     mov r12, rdi        ; r12 = *user
     mov r13, rsi        ; r13 = *esTuitSobresaliente
 
     call trendingTopic_aux
+    
     test eax, eax
     jz .devuelvoNULL
 
-    mov rdi, TUIT_SIZE
-    inc eax
-    mul rdi
-    mov edi, eax            ; fijarme 
-    call malloc                                    ; malloc(sizeof(tuit_t*) * (cantidad + 1));
+    inc eax              ; eax = tamaño + 1
 
-    mov r15, rax                                   ; r15 = **arreglo 
+    mov rdi, 8
+    imul rdi, rax   ; o eax, fijarme
+    call malloc
 
-    mov r14, qword[r12 + USUARIO_FEED_OFFSET]             
+    mov r15, rax        ; r15 = **nuevo_arreglo
+
+    mov r14, qword[r12 + USUARIO_FEED_OFFSET]
     mov r14, qword[r14 + FEED_FIRST_OFFSET]       ; r14 = *actual
 
-    xor rbx, rbx                                  ; ebx = j = 0
+    xor rbx, rbx        ; ebx = i = 0
 
 .loop:
-    cmp r14, 0          ; condición de corte
-    je .devuelvoARREGLO
+    test r14, r14          ; condición de corte
+    jz .devuelvoARREGLO
 
-    mov r8, qword[r14 + PUBLICACION_VALUE_OFFSET]       ; r8 =  *tuit
+    mov r8, qword[r14 + PUBLICACION_VALUE_OFFSET]
+    mov r8d, dword[r8 + TUIT_ID_AUTOR_OFFSET]
 
-    mov r9d, dword[r12 + USUARIO_ID_OFFSET]             ; r9d =  user->id
-    
-    cmp dword[r8 + TUIT_ID_AUTOR_OFFSET], r9d
+    cmp r8d, dword[r12 + USUARIO_ID_OFFSET]
     jne .siguiente
 
-    mov  rdi, r8
-    call r13                                            ; esTuitSobresaliente(tuit)
-    cmp al, 1
-    jne .siguiente    
+    mov rdi, qword[r14 + PUBLICACION_VALUE_OFFSET]
+    call r13
 
-    mov r8, qword[r14 + PUBLICACION_VALUE_OFFSET]       ; r8 =  *tuit
-    mov [r15 + (rbx*8)], r8                             ; arreglo[j] = tuit;
+    test al, al
+    jz .siguiente 
 
-    inc ebx
+    mov r8, qword[r14 + PUBLICACION_VALUE_OFFSET]
+
+    mov qword[r15 + (rbx*8)], r8      ; nuevo_arreglo[i] = actual->value;
+    inc ebx                         ; i ++;
 
 .siguiente:
     mov r14, qword[r14 + PUBLICACION_NEXT_OFFSET]
@@ -104,17 +104,16 @@ trendingTopic:
 
 .devuelvoARREGLO:
 
-    mov qword[r15 + (rbx*8)], 0          ; arreglo[cantidad] = NULL; 
-
-    mov rax, r15                         ; rax = **arreglo
+    mov qword[r15 + (rbx*8)], 0
+    mov rax, r15                    ; nuevo_arreglo[i] = NULL;
     jmp .fin
 
 .devuelvoNULL:
-    mov rax, 0                           ; rax = NULL
+    xor rax, rax                    ; rax = 0
 
 .fin:
     ; === EPÍLOGO ===
-    add rsp, 8
+    add rsp, 8          ; Deshago el alineamiento global
     pop r15
     pop r14
     pop r13
@@ -122,7 +121,6 @@ trendingTopic:
     pop rbx
     pop rbp
     ret
-
 
 ; uint32_t trendingTopic_aux(usuario_t *user, uint8_t (*esTuitSobresaliente)(tuit_t *));
 global trendingTopic_aux 
@@ -144,26 +142,26 @@ trendingTopic_aux:
     mov r12, rdi        ; r12 = *user
     mov r13, rsi        ; r13 = *esTuitSobresaliente
 
-    xor rbx, rbx        ; ebx = cantidad = 0
-
-    mov r14, qword[r12 + USUARIO_FEED_OFFSET]          
+    mov r14, qword[r12 + USUARIO_FEED_OFFSET]
     mov r14, qword[r14 + FEED_FIRST_OFFSET]       ; r14 = *actual
 
+    xor rbx, rbx        ; ebx = cantidad =0
+
 .loop:
-    cmp r14, 0          ; condición de corte
-    je .fin
+    test r14, r14          ; condición de corte
+    jz .fin
 
-    mov r8, qword[r14 + PUBLICACION_VALUE_OFFSET]       ; r8 =  *tuit
+    mov r8, qword[r14 + PUBLICACION_VALUE_OFFSET]
+    mov r8d, dword[r8 + TUIT_ID_AUTOR_OFFSET]
 
-    mov r9d, dword[r12 + USUARIO_ID_OFFSET]             ; r9d =  user->id
-    
-    cmp dword[r8 + TUIT_ID_AUTOR_OFFSET], r9d
+    cmp r8d, dword[r12 + USUARIO_ID_OFFSET]
     jne .siguiente
 
-    mov  rdi, r8
-    call r13                                            ; esTuitSobresaliente(tuit)
-    cmp al, 1
-    jne .siguiente    
+    mov rdi, qword[r14 + PUBLICACION_VALUE_OFFSET]
+    call r13
+
+    test al, al
+    jz .siguiente 
 
     inc ebx
 
@@ -172,7 +170,8 @@ trendingTopic_aux:
     jmp .loop
 
 .fin:
-    mov eax, ebx        ;eax = cantidad
+    xor rax, rax
+    mov eax, ebx         ; eax = cantidad
 
     ; === EPÍLOGO ===
     pop r14
@@ -183,7 +182,7 @@ trendingTopic_aux:
     ret
 
 
-; VERSIÓN USANDO LA PILA 
+; ; VERSIÓN USANDO LA PILA 
 
 ; ; tuit_t **trendingTopic(usuario_t *usuario, uint8_t (*esTuitSobresaliente)(tuit_t *));
 ; global trendingTopic 
@@ -200,7 +199,6 @@ trendingTopic_aux:
 ;     push r14
 ;     push r15
 ;     sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
-
 
 ;     mov r12, rdi        ; r12 = *usuario
 ;     mov r13, rsi        ; r13 = *esTuitSobresaliente    

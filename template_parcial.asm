@@ -51,7 +51,7 @@
 
 .fin:
     ; valor de retorno
-    mov rax, r12       
+    mov rax, r15       
 
     ; === EPÍLOGO ===
     add rsp, 8          ; Deshago el alineamiento global

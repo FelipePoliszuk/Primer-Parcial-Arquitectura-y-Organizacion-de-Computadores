@@ -1,13 +1,13 @@
 #include "../ejs.h"
 
+void bloquearUsuario_aux(feed_t *feed, usuario_t *usuario);
+
 void bloquearUsuario(usuario_t *usuario, usuario_t *usuarioABloquear){
 
   usuario->bloqueados[usuario->cantBloqueados] = usuarioABloquear;
-  usuario->cantBloqueados ++;
-
+  usuario->cantBloqueados++;
   bloquearUsuario_aux(usuario->feed, usuarioABloquear);
-  bloquearUsuario_aux(usuarioABloquear->feed,usuario);
-
+  bloquearUsuario_aux(usuarioABloquear->feed, usuario);
 }
 
 void bloquearUsuario_aux(feed_t *feed, usuario_t *usuario){
@@ -29,6 +29,11 @@ void bloquearUsuario_aux(feed_t *feed, usuario_t *usuario){
     }
   }
 }
+
+
+
+
+// Versión con actual y previo
 
 // void bloquearUsuario_aux(feed_t *feed, usuario_t *usuario){
   
