@@ -22,6 +22,9 @@ TEST(test_ej2_all_seen_same_type) {
 
     pokemon_filtrados_t* res = TEST_CALL_S(obtener_avistados_por_tipo, pdx, "Fuego");
     TEST_ASSERT(res != NULL);
+
+    // printf("%d\n", res->cantidad_pokemons);
+
     TEST_ASSERT(res->cantidad_pokemons == 3);
     TEST_ASSERT(res->ids_pokemons[0] == 1);
     TEST_ASSERT(res->ids_pokemons[1] == 4);

@@ -32,6 +32,12 @@ TEST(test_ej3_chain_of_3) {
     nodo_evolucion_t* res = TEST_CALL_S(rastrear_linea_evolutiva, pdx, 12);
 
     TEST_ASSERT(res != NULL);
+
+    printf("%d\n", largo_cadena(res));
+    printf("%d\n", id_cadena_en(res, 0));
+    
+
+
     TEST_ASSERT(largo_cadena(res) == 3);
     TEST_ASSERT(id_cadena_en(res, 0) == 10);
     TEST_ASSERT(id_cadena_en(res, 1) == 11);
