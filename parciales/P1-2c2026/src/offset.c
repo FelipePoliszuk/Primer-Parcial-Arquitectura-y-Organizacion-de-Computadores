@@ -3,12 +3,12 @@
 #include "ejs.h" //reemplazar por el .h 
 
 int main() {
-    printf("Offset en_juego: %zu\n", offsetof(info_t, nombre));
-    printf("Offset nombre:   %zu\n", offsetof(info_t, tipo));
-    printf("Offset vida:     %zu\n", offsetof(info_t, nivel));
-    // printf("Offset vida:     %zu\n", offsetof(info_t, columnas));
-    // printf("Offset vida:     %zu\n", offsetof(info_t, nivel));
-    printf("SIZE:            %zu\n\n", sizeof(info_t));
+    printf("Offset en_juego: %zu\n", offsetof(pokemon_t, id));
+    printf("Offset nombre:   %zu\n", offsetof(pokemon_t, movimientos));
+    printf("Offset vida:     %zu\n", offsetof(pokemon_t, info));
+    printf("Offset jugador:  %zu\n", offsetof(pokemon_t, descripcion));
+    printf("Offset jugador:  %zu\n", offsetof(pokemon_t, evoluciona_de_id));
+    printf("SIZE:            %zu\n\n", sizeof(pokemon_t));
     
     // printf("Offset mano rojo: %zu\n", offsetof(fantastruco_t, __dir));
     // printf("Offset mano azul: %zu\n", offsetof(fantastruco_t, __dir_entries));
@@ -45,3 +45,8 @@ int main() {
 	// pop r12
 	// pop rbp
 	// ret
+
+
+
+
+//   printf("%d",acciones_ejecutadas);

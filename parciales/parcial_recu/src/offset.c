@@ -1,70 +1,87 @@
+// #include <stdio.h>
+// #include <stddef.h>
+// #include "ej4a.h" //reemplazar por el .h 
+
+// int main() {
+//     printf("Offset en_juego: %zu\n", offsetof(item_kind_t, ability_ptr));
+//     printf("Offset nombre:   %zu\n", offsetof(item_kind_t, ability_ptr));
+//     printf("Offset vida:     %zu\n", offsetof(directory_entry_t, vida));
+//     printf("Offset jugador:  %zu\n", offsetof(directory_entry_t, jugador));
+//     printf("SIZE:            %zu\n\n", sizeof(directory_entry_t));
+    
+//     printf("Offset mano rojo: %zu\n", offsetof(fantastruco_t, __dir));
+//     printf("Offset mano azul: %zu\n", offsetof(fantastruco_t, __dir_entries));
+//     printf("Offset campo:     %zu\n", offsetof(fantastruco_t, __archetype));
+// 	printf("Offset campo:     %zu\n", offsetof(fantastruco_t, face_up));
+//     printf("SIZE:            %zu\n\n", sizeof(fantastruco_t));
+
+//     return 0;
+// }
+
+// // gcc -o offsets offset.c 
+// // ./offsets
+
+// 	// ;prologo
+// 	// push rbp	;alineado
+// 	// mov rbp, rsp
+// 	// push r12	;desalineado
+// 	// push r13	;alineado
+// 	// push r14	;desalineado
+// 	// push r15	;alineado
+// 	// push rbx	;desalineado
+// 	// sub rsp, 8	;alineado
+
+//     // .fin:
+
+// // gcc -S -Og -masm=intel -fverbose-asm -fno-asynchronous-unwind-tables -fcf-protection=none -U_FORTIFY_SOURCE ej2.c -o ej2.s
+
+// 	// ;epilogo
+// 	// add rsp, 8
+// 	// pop rbx
+// 	// pop r15
+// 	// pop r14
+// 	// pop r13
+// 	// pop r12
+// 	// pop rbp
+// 	// ret
+
+
+
+
+// //   printf("%d",acciones_ejecutadas);
+
+
+
 #include <stdio.h>
 #include <stddef.h>
-#include "ejs.h" //reemplazar por el .h 
+#include "ejs.h"   // el .h del parcial
 
-int main() {
-    printf("Offset en_juego: %zu\n", offsetof(Contenido, nombre));
-    printf("Offset nombre:   %zu\n", offsetof(Contenido, valor));
-    printf("Offset vida:     %zu\n", offsetof(Contenido, color));
-    printf("Offset jugador:  %zu\n", offsetof(Contenido, es_tesoro));
-	printf("Offset jugador:  %zu\n", offsetof(Contenido, peso));
-    printf("SIZE:            %zu\n\n", sizeof(Contenido));
+#define OFF(T, f) printf("%-30s %zu\n", #T "." #f, offsetof(T, f))
+#define SZ(T)     printf("%-30s %zu\n\n", "sizeof(" #T ")", sizeof(T))
 
-	
-    
-    printf("Offset mano rojo: %zu\n", offsetof(Habitacion, id));
-    printf("Offset mano azul: %zu\n", offsetof(Habitacion, vecinos));
-    printf("Offset campo:     %zu\n", offsetof(Habitacion, contenido));
-	printf("Offset campo:     %zu\n", offsetof(Habitacion, visitas));
-    printf("SIZE:            %zu\n\n", sizeof(Habitacion));
-    
-    // printf("Offset invocar: %zu\n", offsetof(accion_t, invocar));
-    // printf("Offset destino: %zu\n", offsetof(accion_t, destino));
-    // printf("Offset siguiente:     %zu\n", offsetof(accion_t, siguiente));
-    // printf("SIZE:            %zu\n\n", sizeof(accion_t));
-    
+int main(void) {
+    // un bloque por struct:
+    OFF(Contenido, nombre);
+    OFF(Contenido, valor);
+    OFF(Contenido, color);
+    OFF(Contenido, es_tesoro);
+    OFF(Contenido, peso);
+    SZ(Contenido);
+
+    // un bloque por struct:
+    OFF(Contenido, nombre);
+    OFF(Contenido, valor);
+    OFF(Contenido, color);
+    OFF(Contenido, es_tesoro);
+    OFF(Contenido, peso);
+    SZ(Contenido);    
+
+
+
+
+
 
     return 0;
 }
 
-
-// gcc -o offsets offset.c 
-// ./offsets
-
-
-
-
-
-
-
-	// ;prologo
-	// push rbp	;alineado
-	// mov rbp, rsp
-	// push r12	;desalineado
-	// push r13	;alineado
-	// push r14	;desalineado
-	// push r15	;alineado
-	// push rbx	;desalineado
-	// sub rsp, 8	;alineado
-
-	// xor r12, r12	;limpio posible basura
-	// xor r13, r13	;limpio posible basura
-	// xor r14, r14	;limpio posible basura
-	// xor r15, r15	;limpio posible basura
-	// xor rbx, rbx	;limpio posible basura
-
-
-
-
-
-    // .fin:
-
-	// ;epilogo
-	// add rsp, 8
-	// pop rbx
-	// pop r15
-	// pop r14
-	// pop r13
-	// pop r12
-	// pop rbp
-	// ret
+// compilar desde la carpeta del parcial:  gcc -I src offset.c -o offsets && ./offsets
