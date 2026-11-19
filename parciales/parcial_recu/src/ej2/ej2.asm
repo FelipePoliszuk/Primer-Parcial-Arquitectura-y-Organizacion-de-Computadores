@@ -55,78 +55,78 @@ REC_SIZE                  EQU 16     ; sizeof(Recorrido)
 global  invertirRecorridoConDirecciones
 invertirRecorridoConDirecciones:
 ; registros:
-    ; rdi = rec
-    ; rsi = len
+	; rdi = *rec
+	; rsi =  len
     
     ; === PRÓLOGO ===
     push rbp
     mov rbp, rsp
 
     ; preservar registros callee-saved 
-    push rbx
+    push rbx   
     push r12
     push r13
     push r14
     push r15
+    sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
+    
+    mov r12, rdi        ; r12 = *rec
+    mov r13, rsi        ; r13 =  len
 
-    sub rsp, 8          ; para que el movmiento de la pila sea par (mult 16)
+    test r12, r12 
+    jz .retNull
 
-    cmp rsi, 0
-    je .devuelvoNull    
-
-    xor r12, r12        ; índice = 0 = r12
-
-    mov r13, rdi        ; r13 = rec
-    mov r14, rsi        ; r14 = len
+    test r13, r13 
+    jz .retNull
 
     mov rdi, REC_SIZE
     call malloc
-    mov rbx, rax        ;rbx = inverso
 
-    mov edi, 4        ; edi = 4 = size(Accion)
-    imul edi, r14d    ; multiplico size(Accion) * len
+    mov r15, rax        ; r15 = *recorrido_invertido
+
+    mov rdi, 4
+    imul rdi, r13
     call malloc
-    mov r15, rax      ; r15 = acciones
 
+    mov r14, rax        ; r14 = *acciones
+
+    xor rbx, rbx        ; rbx = índice = 0
 
 .loop:
-    cmp r12, r14          ; condición de corte
-    je .devuelvoArreglo
+    cmp rbx, r13          ; condición de corte
+    je .retRecorrido
 
-    xor r8, r8
 
-    mov r8, [r13 + REC_ACCIONES_OFFSET]     ; r8 = Base del array rec.acciones
+    mov rdi, qword[r12 + REC_ACCIONES_OFFSET]
 
-    mov r9, r14
-    sub r9, r12
-    sub r9, 1
+    mov r8, r13
+    dec r8
+    sub r8, rbx
 
-    mov r8d, [r8 + r9*4]            ; r8d = rec->acciones[len-i-1];
+    mov edi, dword[rdi + (r8*4)]
 
-    mov edi, r8d                    ; pasar argumento
-    call accion_inversa             ; llamada a función
-    mov [r15 + (r12 * 4)], eax      ; acciones[i] = accion_inversa(accion);
+    call accion_inversa
+
+    mov dword[r14 + (rbx*4)], eax
 
 .siguiente:
-    inc r12
+    inc rbx
     jmp .loop
 
-.devuelvoArreglo:
 
-    mov [rbx + REC_ACCIONES_OFFSET], r15        ; inverso->acciones = acciones;
-    mov [rbx + REC_CANT_ACCIONES_OFFSET], r14   ; inverso->cant_acciones = len;
+.retRecorrido:
+    mov qword[r15 + REC_ACCIONES_OFFSET], r14           ; recorrido_invertido->acciones = acciones;
+    mov qword[r15 + REC_CANT_ACCIONES_OFFSET], r13      ; recorrido_invertido->cant_acciones = len;
 
-    mov rax, rbx
+    mov rax, r15            ; return recorrido_invertido;
     jmp .fin
 
-.devuelvoNull:
-    xor rax, rax   
+.retNull:
+    xor rax, rax        ; return NULL;
 
 .fin:
     ; === EPÍLOGO ===
-
-    add rsp, 8
-
+    add rsp, 8          ; Deshago el alineamiento global
     pop r15
     pop r14
     pop r13
@@ -135,35 +135,40 @@ invertirRecorridoConDirecciones:
     pop rbp
     ret
 
-
 global accion_inversa
 accion_inversa:
 ; registros:
-    ; rdi = acc
+	; rdi = acc
+    
+    ; === PRÓLOGO ===
+    push rbp
+    mov rbp, rsp
 
-    cmp rdi, 0
-    je .devuelvoSur
+    cmp edi, 0
+    je .retSur
 
-    cmp rdi, 1
-    je .devuelvoNorte
+    cmp edi, 1
+    je .retNorte  
 
-    cmp rdi, 2
-    je .devuelvoOeste
+    cmp edi, 2
+    je .retOeste   
 
-    mov eax, 2     
-    jmp .fin   
-        
-.devuelvoSur:
-    mov eax, 1     
-    je .fin
+.retEste:
+    mov eax, 2
+    jmp .fin
 
-.devuelvoNorte:
-    mov eax, 0     
-    je .fin
+.retOeste:
+    mov eax, 3
+    jmp .fin
 
-.devuelvoOeste:
-    mov eax, 3     
-    je .fin    
-         
-.fin: 
-    ret      
+.retSur:
+    mov eax, 1
+    jmp .fin
+
+.retNorte:
+    mov eax, 0
+
+.fin:    
+    ; === EPÍLOGO ===
+    pop rbp
+    ret

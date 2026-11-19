@@ -23,3 +23,8 @@ Configuración de VS Code
         Remove Line Comment = Ctrl + Shift + R
 
     Verificación de IntelliSense: Escribir un bloque if para ver si autocompleta la estructura, y tipear el nombre de un struct seguido de un punto . o flecha -> para confirmar que sugiera los campos internos.
+
+
+whatsApp Image
+funciones_gdb.txt
+template_parcial.asm

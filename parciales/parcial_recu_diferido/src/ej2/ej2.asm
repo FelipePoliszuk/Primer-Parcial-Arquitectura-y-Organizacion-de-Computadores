@@ -36,7 +36,6 @@ NULL EQU 0
 extern backpackContainsItem
 extern free
 
-
 ; void filterPossibleDestinations(itinerary_t *itinerary, backpack_t *backpack)
 global filterPossibleDestinations
 filterPossibleDestinations:
@@ -52,39 +51,46 @@ filterPossibleDestinations:
     push rbx   
     push r12
     push r13
+    push r14
+    push r15
     sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
     
-    lea rbx, [rdi + ITINERARY_FIRST_OFFSET]        ; rbx = **indirecto
-    mov r13, rsi                                   ; r13 = *backpack
+    mov r12, rdi        ; r12 = *itinerary
+    mov r13, rsi        ; r13 = *backpack
+
+    lea rbx, qword[r12 + ITINERARY_FIRST_OFFSET]    ; rbx = **indirecto
 
 .loop:
     cmp qword[rbx], 0          ; condición de corte
     je .fin
 
-    mov r12, qword[rbx]         ; r12 = *actual
+    mov r14, qword[rbx]         ; r14 = *actual
 
-    mov rdi, r13                                    ; rdi = *backpack
-    mov rsi, qword[r12 + EVENT_DESTINATION_OFFSET]  ; rsi = *actual->destination
+    mov rdi, r13
+    mov rsi, qword[r14 + EVENT_DESTINATION_OFFSET]
+
     call meetsRequirements
 
-    test al, al 
+    test al, al
     jnz .else
 
-    mov r8, qword[r12 + EVENT_NEXT_OFFSET]     
+    mov r8, qword[r14 + EVENT_NEXT_OFFSET]       ; r8 = actual->next
     mov qword[rbx], r8                      ; *indirecto = actual->next;
 
-    mov rdi, r12
-    call free_event2
+    mov rdi, r14
+    call free_event2       ; free_event2(actual);
 
     jmp .loop
 
 .else:
-    lea rbx, [r12 + EVENT_NEXT_OFFSET]          ; indirecto = &(actual->next);
+    lea rbx, qword[r14 + EVENT_NEXT_OFFSET]       ; indirecto = &actual->next;
     jmp .loop
 
-.fin: 
+.fin:
     ; === EPÍLOGO ===
     add rsp, 8          ; Deshago el alineamiento global
+    pop r15
+    pop r14
     pop r13
     pop r12
     pop rbx
@@ -113,35 +119,34 @@ meetsRequirements:
     mov r12, rdi        ; r12 = *backpack
     mov r13, rsi        ; r13 = *dest
 
-    xor rbx, rbx        ; ebx = índice = 0
+    xor rbx, rbx                                                    ; ebx  = índice = 0
     mov r14d, dword[r13 + DESTINATION_REQUIREMENTS_SIZE_OFFSET]     ; r14d = dest->requirements_size
 
 .loop:
-    cmp ebx, r14d         ; condición de corte
-    je .devuelvoTrue
+    cmp ebx, r14d          ; condición de corte
+    je .retTrue
 
-    mov rdi, r12                ; rdi = *backpack
-
-    mov rsi, qword[r13 + DESTINATION_REQUIREMENTS_OFFSET]   ; dest->requirements
-    mov esi, dword[rsi + (rbx*4)]                           ; dest->requirements[i]
+    mov rdi, r12                                            ; rdi = backpack
+    mov rsi, qword[r13 + DESTINATION_REQUIREMENTS_OFFSET]   
+    mov esi, dword[rsi + (rbx*4)]                           ; esi = dest->requirements[i]
 
     call backpackContainsItem
 
     test al, al
-    jz .devuelvoFalse
+    jz .retFalse
 
 .siguiente:
     inc ebx
     jmp .loop
 
-.devuelvoFalse:
-    mov rax, 0          ; return false;
+.retFalse:
+    xor rax, rax        ; return false;
     jmp .fin
 
-.devuelvoTrue:      
+.retTrue:
     mov rax, 1          ; return true;
 
-.fin:  
+.fin:
     ; === EPÍLOGO ===
     pop r14
     pop r13
@@ -163,36 +168,100 @@ free_event2:
     mov rbp, rsp
 
     ; preservar registros callee-saved 
-    push rbx   
     push r12
+    sub rsp, 8
 
-    mov rbx, rdi                                                 ; rbx = *event
-    mov r12, qword[rbx + EVENT_DESTINATION_OFFSET]               ; r12 = event->destination
- 
-    mov rdi, qword[r12 + DESTINATION_REQUIREMENTS_OFFSET]        ; rdi = event->destination->requirements
-    call free  
+    mov r12, rdi    ; r12 = *event
 
-    mov rdi, r12        
+    mov rdi, qword[r12 + EVENT_DESTINATION_OFFSET]
+
+    mov rdi, qword[rdi + DESTINATION_REQUIREMENTS_OFFSET]
+
+    call free           ; free(event->destination->requirements);
+
+    mov rdi, qword[r12 + EVENT_DESTINATION_OFFSET]
+
     call free           ; free(event->destination);
 
-    mov rdi, rbx        
+    mov rdi, r12
+
     call free           ; free(event);
 
     ; === EPÍLOGO ===
+    add rsp, 8
     pop r12
-    pop rbx
     pop rbp
     ret
 
-; ;  versión con *anterior
+
+
+
+
+
 
 ; ; void filterPossibleDestinations(itinerary_t *itinerary, backpack_t *backpack)
 ; global filterPossibleDestinations
 ; filterPossibleDestinations:
 ; ; registros:
-;     ; rdi = *itinerary
-;     ; rsi = *backpack
+; 	; rdi = *itinerary
+; 	; rsi = *backpack
+    
+;     ; === PRÓLOGO ===
+;     push rbp
+;     mov rbp, rsp
 
+;     ; preservar registros callee-saved 
+;     push rbx   
+;     push r12
+;     push r13
+;     sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
+    
+;     lea rbx, [rdi + ITINERARY_FIRST_OFFSET]        ; rbx = **indirecto
+;     mov r13, rsi                                   ; r13 = *backpack
+
+; .loop:
+;     cmp qword[rbx], 0          ; condición de corte
+;     je .fin
+
+;     mov r12, qword[rbx]         ; r12 = *actual
+
+;     mov rdi, r13                                    ; rdi = *backpack
+;     mov rsi, qword[r12 + EVENT_DESTINATION_OFFSET]  ; rsi = *actual->destination
+;     call meetsRequirements
+
+;     test al, al 
+;     jnz .else
+
+;     mov r8, qword[r12 + EVENT_NEXT_OFFSET]     
+;     mov qword[rbx], r8                      ; *indirecto = actual->next;
+
+;     mov rdi, r12
+;     call free_event2
+
+;     jmp .loop
+
+; .else:
+;     lea rbx, [r12 + EVENT_NEXT_OFFSET]          ; indirecto = &(actual->next);
+;     jmp .loop
+
+; .fin: 
+;     ; === EPÍLOGO ===
+;     add rsp, 8          ; Deshago el alineamiento global
+;     pop r13
+;     pop r12
+;     pop rbx
+;     pop rbp
+;     ret
+
+; ; ----------- Función Auxiliar - meetsRequirements -----------
+
+; ; bool meetsRequirements(backpack_t *backpack, destination_t *dest) {
+; global meetsRequirements
+; meetsRequirements:
+; ; registros:
+; 	; rdi = *backpack
+; 	; rsi = *dest
+    
 ;     ; === PRÓLOGO ===
 ;     push rbp
 ;     mov rbp, rsp
@@ -202,63 +271,165 @@ free_event2:
 ;     push r12
 ;     push r13
 ;     push r14
-;     push r15
-;     sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
+    
+;     mov r12, rdi        ; r12 = *backpack
+;     mov r13, rsi        ; r13 = *dest
 
-;     mov r12, rdi        ; r12 = itinerary
-;     mov r13, rsi        ; r13 = backpack
-
-;     mov rbx, qword[r12 + ITINERARY_FIRST_OFFSET]        ; rbx = (*)actual
-
-;     xor r14, r14        ; r14 = anterior = NULL
+;     xor rbx, rbx        ; ebx = índice = 0
+;     mov r14d, dword[r13 + DESTINATION_REQUIREMENTS_SIZE_OFFSET]     ; r14d = dest->requirements_size
 
 ; .loop:
-;     test rbx, rbx         ; condición de corte
-;     jz .fin
+;     cmp ebx, r14d         ; condición de corte
+;     je .devuelvoTrue
 
-;     mov r15, qword[rbx + EVENT_NEXT_OFFSET]      ; r15 = proximo
+;     mov rdi, r12                ; rdi = *backpack
 
-;     mov rdi, r13            ; rdi = backpack
-;     mov rsi, qword[rbx + EVENT_DESTINATION_OFFSET]       ; rsi = actual->destination
-;     call meetsRequirements
+;     mov rsi, qword[r13 + DESTINATION_REQUIREMENTS_OFFSET]   ; dest->requirements
+;     mov esi, dword[rsi + (rbx*4)]                           ; dest->requirements[i]
 
-;     test al,al
-;     jne .else
+;     call backpackContainsItem
 
-;     test r14, r14   
-;     je .ifTrue
-
-;     mov qword[r14 + EVENT_NEXT_OFFSET], r15      ; anterior->next = proximo
-;     jmp .free
-
-
-; .ifTrue:
-;     mov qword[r12 + ITINERARY_FIRST_OFFSET], r15
-;     jmp .free
-
-
-; .free:
-
-;     mov rdi, rbx        ; rdi = actual
-;     call free_event2
-
-;     jmp .siguiente
-
-; .else: 
-;     mov r14, rbx        ; r14 (anterior) = actual
+;     test al, al
+;     jz .devuelvoFalse
 
 ; .siguiente:
-;     mov rbx, r15          ; rbx (actual) = proximo
+;     inc ebx
 ;     jmp .loop
 
-; .fin:    
+; .devuelvoFalse:
+;     mov rax, 0          ; return false;
+;     jmp .fin
 
+; .devuelvoTrue:      
+;     mov rax, 1          ; return true;
+
+; .fin:  
 ;     ; === EPÍLOGO ===
-;     add rsp, 8          ; Deshago el alineamiento global
-;     pop r15
 ;     pop r14
 ;     pop r13
 ;     pop r12
 ;     pop rbx
 ;     pop rbp
 ;     ret
+
+; ; ----------- Función Auxiliar - free_event -----------
+
+; ; void free_event2(event_t *event) 
+; global free_event2
+; free_event2:
+; ; registros:
+; 	; rdi = *event
+    
+;     ; === PRÓLOGO ===
+;     push rbp
+;     mov rbp, rsp
+
+;     ; preservar registros callee-saved 
+;     push rbx   
+;     push r12
+
+;     mov rbx, rdi                                                 ; rbx = *event
+;     mov r12, qword[rbx + EVENT_DESTINATION_OFFSET]               ; r12 = event->destination
+ 
+;     mov rdi, qword[r12 + DESTINATION_REQUIREMENTS_OFFSET]        ; rdi = event->destination->requirements
+;     call free  
+
+;     mov rdi, r12        
+;     call free           ; free(event->destination);
+
+;     mov rdi, rbx        
+;     call free           ; free(event);
+
+;     ; === EPÍLOGO ===
+;     pop r12
+;     pop rbx
+;     pop rbp
+;     ret
+
+; ; ;  versión con *anterior
+
+; ; ; void filterPossibleDestinations(itinerary_t *itinerary, backpack_t *backpack)
+; ; global filterPossibleDestinations
+; ; filterPossibleDestinations:
+; ; ; registros:
+; ;     ; rdi = *itinerary
+; ;     ; rsi = *backpack
+
+; ;     ; === PRÓLOGO ===
+; ;     push rbp
+; ;     mov rbp, rsp
+
+; ;     ; preservar registros callee-saved 
+; ;     push rbx   
+; ;     push r12
+; ;     push r13
+; ;     push r14
+; ;     push r15
+; ;     sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
+
+; ;     mov r12, rdi        ; r12 = itinerary
+; ;     mov r13, rsi        ; r13 = backpack
+
+; ;     mov rbx, qword[r12 + ITINERARY_FIRST_OFFSET]        ; rbx = (*)actual
+
+; ;     xor r14, r14        ; r14 = anterior = NULL
+
+; ; .loop:
+; ;     test rbx, rbx         ; condición de corte
+; ;     jz .fin
+
+; ;     mov r15, qword[rbx + EVENT_NEXT_OFFSET]      ; r15 = proximo
+
+; ;     mov rdi, r13            ; rdi = backpack
+; ;     mov rsi, qword[rbx + EVENT_DESTINATION_OFFSET]       ; rsi = actual->destination
+; ;     call meetsRequirements
+
+; ;     test al,al
+; ;     jne .else
+
+; ;     test r14, r14   
+; ;     je .ifTrue
+
+; ;     mov qword[r14 + EVENT_NEXT_OFFSET], r15      ; anterior->next = proximo
+; ;     jmp .free
+
+
+; ; .ifTrue:
+; ;     mov qword[r12 + ITINERARY_FIRST_OFFSET], r15
+; ;     jmp .free
+
+
+; ; .free:
+
+; ;     mov rdi, rbx        ; rdi = actual
+; ;     call free_event2
+
+; ;     jmp .siguiente
+
+; ; .else: 
+; ;     mov r14, rbx        ; r14 (anterior) = actual
+
+; ; .siguiente:
+; ;     mov rbx, r15          ; rbx (actual) = proximo
+; ;     jmp .loop
+
+; ; .fin:    
+
+; ;     ; === EPÍLOGO ===
+; ;     add rsp, 8          ; Deshago el alineamiento global
+; ;     pop r15
+; ;     pop r14
+; ;     pop r13
+; ;     pop r12
+; ;     pop rbx
+; ;     pop rbp
+; ;     ret
+
+
+
+
+
+
+
+
+

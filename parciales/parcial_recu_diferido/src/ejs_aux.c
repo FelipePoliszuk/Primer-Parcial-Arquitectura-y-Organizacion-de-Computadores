@@ -9,3 +9,4 @@ bool backpackContainsItem(backpack_t *backpack, item_kind_t kind) {
 
   return false;
 }
+

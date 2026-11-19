@@ -1,5 +1,29 @@
 #include "../ejs.h"
 
+Accion accion_inversa(Accion acc);
+
+
+Recorrido *invertirRecorridoConDirecciones(const Recorrido *rec, uint64_t len) {
+
+    if (rec == NULL || len == 0){
+        return NULL;
+    }
+
+    Recorrido *recorrido_invertido = malloc(sizeof(Recorrido));
+
+    Accion *acciones = malloc(sizeof(Accion) * len); 
+
+    for (uint64_t i = 0; i < len; i++){
+        
+        acciones[i] = accion_inversa (rec->acciones[len - i - 1]);
+    }
+
+    recorrido_invertido->acciones = acciones;
+    recorrido_invertido->cant_acciones = len;
+
+    return recorrido_invertido;
+}
+
 Accion accion_inversa(Accion acc){
 
     if (acc == ACC_NORTE){
@@ -10,42 +34,15 @@ Accion accion_inversa(Accion acc){
         return ACC_NORTE;
     }
     
+    if (acc == ACC_OESTE){
+        return ACC_ESTE;
+    }
+    
     if (acc == ACC_ESTE){
         return ACC_OESTE;
-    }
-    
-    return ACC_ESTE;
-    
-}
-
-// es la versión que tengo resuelta en asm
-// versión con un indice pero haciendo rec->acciones[len-i-1]; feo.
-Recorrido *invertirRecorridoConDirecciones(const Recorrido *rec, uint64_t len) {
-    
-    if (len == 0){
-        return NULL;
-    }
-
-    Recorrido *inverso = malloc((sizeof(Recorrido)));
-    Accion *acciones = malloc((sizeof(Accion)) * len);
-
-    for (uint64_t i = 0; i < len; i++){
-
-        Accion accion = rec->acciones[len-i-1];
-        acciones[i] = accion_inversa(accion);
-
     }    
-
-    inverso->acciones = acciones;
-    inverso->cant_acciones = len;
-
-    return inverso;
-
+    
 }
-
-
-
-
 
 // // mejor versión
 // Recorrido *invertirRecorridoConDirecciones(const Recorrido *rec, uint64_t len) {
@@ -73,34 +70,31 @@ Recorrido *invertirRecorridoConDirecciones(const Recorrido *rec, uint64_t len) {
 //     return inverso;
 // }
 
-// // versión con dos indices pero con int
-// Recorrido *invertirRecorridoConDirecciones(const Recorrido *rec, uint64_t len) {
+// // // versión con dos indices pero con int
+// // Recorrido *invertirRecorridoConDirecciones(const Recorrido *rec, uint64_t len) {
  
-//     if (len == 0){
-//         return NULL;
-//     }
+// //     if (len == 0){
+// //         return NULL;
+// //     }
 
-//     Recorrido *recorrido_inverso = malloc(sizeof(Recorrido));
+// //     Recorrido *recorrido_inverso = malloc(sizeof(Recorrido));
 
-//     recorrido_inverso->cant_acciones = len;
+// //     recorrido_inverso->cant_acciones = len;
 
-//     Accion *acciones_inversas = malloc(sizeof(Accion)*len);
+// //     Accion *acciones_inversas = malloc(sizeof(Accion)*len);
 
-//     int j = 0;
+// //     int j = 0;
 
-//     for (int i = (len-1); i >= 0; i --){
+// //     for (int i = (len-1); i >= 0; i --){
         
-//         Accion accion = rec->acciones[i];
+// //         Accion accion = rec->acciones[i];
 
-//         acciones_inversas[j] = accion_inversa(accion);
-//         j ++;
-//     }
+// //         acciones_inversas[j] = accion_inversa(accion);
+// //         j ++;
+// //     }
 
-//     recorrido_inverso->acciones = acciones_inversas;
+// //     recorrido_inverso->acciones = acciones_inversas;
 
-//     return recorrido_inverso;
+// //     return recorrido_inverso;
 
-// }
-
-
-
+// // }

@@ -68,3 +68,16 @@ q (quit)              ; salir de gdb
 
 ver los primeros 10 posiciones dela array rdx (ejemplo)
 x/10bx $rdx
+
+
+printf("%d",acciones_ejecutadas);
+
+p (uint32_t)$r12d
+p *(TIPO*)$REG    (>>> p *(item_kind_t*)$rdi)
+
+
+
+buen combo:
+gdb ./test_asm
+run
+bt

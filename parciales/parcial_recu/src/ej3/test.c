@@ -12,7 +12,11 @@ TEST(test_ej3_ejemplo_un_tesoro) {
     bool *visitado = calloc(mapa.n_habitaciones, sizeof(bool));
     TEST_ASSERT(visitado != NULL);
 
+    // printf("%d",total);
+
     uint32_t total = TEST_CALL_I(sumarTesoros, &mapa, 0u, visitado);
+    printf("%d\n",total);
+
     TEST_ASSERT(total == 100u); /* la "Cámara del Tesoro" en el ejemplo vale 100 */
     free(visitado);
     liberarMapa(&mapa);
@@ -25,6 +29,7 @@ TEST(test_ej3_ejemplo_sin_tesoros) {
     TEST_ASSERT(visitado != NULL);
 
     uint32_t total = TEST_CALL_I(sumarTesoros, &mapa, 0u, visitado);
+    
     TEST_ASSERT(total == 0u);
 
     free(visitado);

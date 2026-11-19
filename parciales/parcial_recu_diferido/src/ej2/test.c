@@ -28,28 +28,45 @@ TEST(test_ej2_itinerary_single_destination_empty_requirements) {
   backpack_t *backpack = createBackpack(5);
   backpackAddItemEx(backpack, ITEM_KIND_SLEEPING_BAG, 1);
   backpack_t *backpack_clon = backpack_clone(backpack);
+
+
   itinerary_t *itinerary = createItinerary();
   itineraryAddDestination(itinerary, createDestination("Cerro Campanario"));
   itinerary_t *itinerary_clon = itinerary_clone(itinerary);
 
+
+
   TEST_CALL_V(filterPossibleDestinations, itinerary, backpack);
+
   TEST_ASSERT_EQUALS(bool, true, itinerary_equals(itinerary, itinerary_clon));
   TEST_ASSERT_EQUALS(bool, true, backpack_equals(backpack, backpack_clon));
 
+
   if (itinerary) free_itinerary(itinerary);
+  
   if (itinerary_clon) free_itinerary(itinerary_clon);
   if (backpack) free_backpack(backpack);
+
+
   if (backpack_clon) free_backpack(backpack_clon);
+
+
 }
 
 TEST(test_ej2_itinerary_single_destination_empty_backpack) {
+
+
   backpack_t *backpack = createBackpack(5);
   backpack_t *backpack_clon = backpack_clone(backpack);
   itinerary_t *itinerary = createItinerary();
   itinerary_t *itinerary_clon = itinerary_clone(itinerary);
   itineraryAddDestinationEx(itinerary, "Cerro Catedral", ITEM_KIND_SLEEPING_BAG);
 
+
+  
+  
   TEST_CALL_V(filterPossibleDestinations, itinerary, backpack);
+
   TEST_ASSERT_EQUALS(bool, true, itinerary_equals(itinerary, itinerary_clon));
   TEST_ASSERT_EQUALS(bool, true, backpack_equals(backpack, backpack_clon));
 

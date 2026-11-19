@@ -2,23 +2,24 @@
 #include "../ejs_aux.h"
 
 bool meetsRequirements(backpack_t *backpack, destination_t *dest);
+void free_event2(event_t *event);
 
 
 void filterPossibleDestinations(itinerary_t *itinerary, backpack_t *backpack) {
 
-    event_t **indirecto = &(itinerary->first);
+    event_t **indirecto = &itinerary->first;
 
     while (*indirecto){
 
         event_t *actual = *indirecto;
-
-        if (!meetsRequirements(backpack,actual->destination)){
-            
+        
+        if (!meetsRequirements(backpack, actual->destination)){
             *indirecto = actual->next;
             free_event2(actual);
-
         } else {
-            indirecto = &(actual->next);
+
+            indirecto = &actual->next;
+
         }
     }
 }
@@ -27,11 +28,10 @@ void filterPossibleDestinations(itinerary_t *itinerary, backpack_t *backpack) {
 bool meetsRequirements(backpack_t *backpack, destination_t *dest) {
 
     for (uint32_t i = 0; i < dest->requirements_size; i++){
-
-        if (!backpackContainsItem(backpack,dest->requirements[i])){
+        
+        if (!backpackContainsItem(backpack, dest->requirements[i])){
             return false;
         }
-
     }
 
     return true;
@@ -45,6 +45,7 @@ void free_event2(event_t *event) {
     free(event);
 
 }
+
 
 // // versión con *anterior
 // void filterPossibleDestinations(itinerary_t *itinerary, backpack_t *backpack) {

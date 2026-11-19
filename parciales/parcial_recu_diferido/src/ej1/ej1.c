@@ -3,15 +3,15 @@
 
 bool canItemFitInBackpack(backpack_t *backpack, item_t *item) {
 
-    uint8_t pesoMochila = 0;
+    int peso = 0;
 
     for (uint32_t i = 0; i < backpack->item_count; i++){
-        pesoMochila += backpack->items[i].weight;
+        peso += backpack->items[i].weight;
     }
 
-    if (pesoMochila + item->weight <= backpack->max_weight){
-        return true;
+    if (peso + item->weight > backpack->max_weight){
+        return false;
     }
     
-    return false;
+    return true;
 }

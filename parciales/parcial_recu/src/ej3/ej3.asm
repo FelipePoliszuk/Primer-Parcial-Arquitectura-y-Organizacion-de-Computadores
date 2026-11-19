@@ -55,10 +55,10 @@ REC_SIZE                  EQU 16     ; sizeof(Recorrido)
 global  sumarTesoros
 sumarTesoros:
 ; registros:
-    ; rdi = mapa
-    ; rsi = actual
-    ; rdx = visitado
-
+	; rdi = *mapa
+	; esi =  actual
+	; rdx = *visitado
+    
     ; === PRÓLOGO ===
     push rbp
     mov rbp, rsp
@@ -69,66 +69,64 @@ sumarTesoros:
     push r13
     push r14
     push r15
-
-    mov r12, rdi         ; r12 = mapa
-    mov r13d, esi        ; r13 = actual
-    mov r14, rdx         ; r14 = visitado
-
-    xor r15, r15        ; r15 = acumulador = 0
-
-    cmp r13d, 99    
-    je .fin                 ; si actual es inválido, corto
-
-    cmp byte[r14 + r13], 1              
-    je .fin                 ; si ya fue visitado, corto
-
-    mov r9, [r12 + MAP_HABITACIONES_OFFSET] ; r9 = mapa->habitaciones      
+    sub rsp, 8          ; Alineamiento GLOBAL (La pila ya es segura para toda la función)
     
-    mov rax, r13
+    mov r12, rdi         ; r12  = *mapa
+    mov r13d, esi        ; r13d =  actual
+    mov r14, rdx         ; r14  = *visitado
 
-    imul rax, HAB_SIZE           ; rax = actual * sizeof(Habitacion)
-    add r9, rax                  ; r9 = mapa->habitaciones[actual]
+    xor r15, r15         ; r15d = acumulador = 0
 
-    cmp byte[r9 + HAB_CONTENIDO_OFFSET + CONT_ES_TESORO_OFFSET], 0      
-    je .noSumo      ; si no es tesoro, salto
-
-    add r15d, [r9 + HAB_CONTENIDO_OFFSET + CONT_VALOR_OFFSET]   ; sumo el valor del tesoro al acumulador   
-
-.noSumo:
-
-    mov byte[r14 + r13], 1          ; marco como visitado
-
-    xor rbx, rbx        ; rbx = índice = 0
-
-.loop:
-    cmp ebx, 4          ; condición de corte
+    cmp r13, 99
     je .fin
 
-    mov r10d, [r9 + HAB_VECINOS_OFFSET + (rbx*4)]     ;r10d = habitacion_actual.vecinos[i]
+    cmp byte[r14 + (r13*1)], 0
+    jne .fin    
 
-    push r9
+    mov r8, qword[r12 + MAP_HABITACIONES_OFFSET]    ; mapa->habitaciones
 
-    mov rdi, r12         ;rdi = mapa
-    mov esi, r10d        ;esi = habitacion_actual.vecinos[i]
-    mov rdx, r14         ;rdx = visitado
+    mov r9d, HAB_SIZE
+    imul r9d, r13d        
 
+    cmp byte[r8 + r9 + HAB_CONTENIDO_OFFSET + CONT_ES_TESORO_OFFSET], 0   
+    
+    je .noAcumulo
+
+    add r15d, dword[r8 + r9 + HAB_CONTENIDO_OFFSET + CONT_VALOR_OFFSET]   
+
+.noAcumulo:
+
+    mov byte[r14 + (r13*1)], 1      ; visitado[actual] = true;
+
+    xor rbx, rbx        ; rbx = índice = 0
+.loop:
+    cmp rbx, 4          ; condición de corte
+    je .fin
+
+    mov rdi, r12        ; rdi = *mapa
+    ; ---------
+    mov r10, qword[r12 + MAP_HABITACIONES_OFFSET]    ; mapa->habitaciones  
+    mov r9d, r13d    
+    imul r9, HAB_SIZE
+    add r10, r9
+    mov esi, dword[r10 + HAB_VECINOS_OFFSET + (rbx*4)]  
+    ; ---------
+    mov rdx, r14        ; r14 = *visitado
     call sumarTesoros
 
-    pop r9
-    
-    add r15d, eax         ; sumar al acumulador el resultado de la llamada
+    add r15d, eax       ; acumulador += sumarTesoros(mapa, mapa->habitaciones[actual].vecinos[i], visitado);
 
 .siguiente:
-    inc ebx
-    jmp .loop          
+    inc rbx
+    jmp .loop
 
 .fin:
-    ; valor de retorno
-    mov eax, r15d       ; ejemplo, devolver acumulador en eax
+    mov eax, r15d        ; return acumulador;
 
     ; === EPÍLOGO ===
+    add rsp, 8          ; Deshago el alineamiento global
     pop r15
-    pop r14         
+    pop r14
     pop r13
     pop r12
     pop rbx

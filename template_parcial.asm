@@ -29,8 +29,6 @@
     ; -------------------
 
     xor rbx, rbx        ; rbx = índice = 0
-    xor r12, r12        ; acumulador
-
 .loop:
     cmp rbx, N          ; condición de corte
     je .fin

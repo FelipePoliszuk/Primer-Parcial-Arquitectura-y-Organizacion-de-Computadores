@@ -44,3 +44,8 @@ int main() {
 	// pop r12
 	// pop rbp
 	// ret
+
+
+
+
+//   printf("%d",acciones_ejecutadas);
