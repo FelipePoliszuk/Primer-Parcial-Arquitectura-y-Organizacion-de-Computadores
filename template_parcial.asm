@@ -22,7 +22,7 @@
     mov r13, rsi        ; r13 = 
     mov r14, rdx        ; r14 = 
     mov r15, rcx        ; r15 = 
-    mov rbx, r8         ; rbx = 
+    ; mov rbx, r8         ; rbx = 
 
     ; -------------------
     ; Código de inicialización
